@@ -129,7 +129,7 @@ export default {
           const minutes = parseInt(params.get("timeInterval") ?? '0');
           timeInterval = `AND created_at > datetime('now', '-${minutes} minutes')`;
         }
-        if (params.has("dateRange")) {
+        if (params.has("startDate")) {
           timeInterval = `AND created_at between ${params.get("startDate")} and ${params.get("endDate")}`
         }
         const { results } = await env.DB.prepare(
