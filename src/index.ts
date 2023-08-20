@@ -129,6 +129,9 @@ export default {
           const minutes = parseInt(params.get("timeInterval") ?? '0');
           timeInterval = `AND created_at > datetime('now', '-${minutes} minutes')`;
         }
+        if (params.has("dateRange")) {
+          timeInterval = `AND created_at between ${params.get("startDate")} and ${params.get("endDate")}`
+        }
         const { results } = await env.DB.prepare(
           `SELECT lat, lng, created_at, iv FROM Locations WHERE DeviceId = ? ${timeInterval} ORDER BY created_at DESC`
         ).bind(device).all();
