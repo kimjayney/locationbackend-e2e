@@ -21,6 +21,23 @@ function returnCreatedTime(expire_year = 0) {
   return `${dateString} ${timeString}`
 }
 
+function adjustTime(inputTime) {
+  // 입력된 시간을 Date 객체로 변환합니다.
+  const inputDate = new Date(inputTime);
+
+  // -9시간을 밀리초 단위로 계산합니다.
+  const timeAdjustment = 9 * 60 * 60 * 1000;
+
+  // 입력된 시간에서 -9시간을 빼줍니다.
+  const adjustedTime = new Date(inputDate.getTime() - timeAdjustment);
+
+  // 조정된 시간을 원하는 형식("YYYY-MM-DDTHH:mm:ss")으로 문자열로 변환하여 반환합니다.
+  const adjustedTimeString = adjustedTime.toISOString().slice(0, 19).replace('T', ' ');
+  return adjustedTimeString;
+}
+
+
+
 export default {
 	async fetch(request: Request, env: Env) {
 	  const { pathname } = new URL(request.url);
@@ -129,13 +146,17 @@ export default {
           const minutes = parseInt(params.get("timeInterval") ?? '0');
           timeInterval = `AND created_at > datetime('now', '-${minutes} minutes')`;
         }
-        if (params.has("startDate")) {
-          timeInterval = `AND created_at between ${params.get("startDate")} and ${params.get("endDate")}`
+        if (params.has("startDate")) { 
+          const startDate = adjustTime(params.get("startDate"));
+          const endDate = adjustTime(params.get("endDate")); 
+          console.log(startDate, endDate)
+          timeInterval = `AND created_at between '${startDate }' and '${endDate}'`
+          console.log(timeInterval)
         }
         const { results } = await env.DB.prepare(
           `SELECT lat, lng, created_at, iv FROM Locations WHERE DeviceId = ? ${timeInterval} ORDER BY created_at DESC`
         ).bind(device).all();
-        
+         
         return new Response(JSON.stringify({
           success: true, 
           status: true,
