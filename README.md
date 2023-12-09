@@ -6,3 +6,7 @@
 
 # iOS
 - https://github.com/kimjayney/e2e-location-client-ios
+
+# CI/CD
+- Cloudflare Pages
+- Cloudflare Wrangler
