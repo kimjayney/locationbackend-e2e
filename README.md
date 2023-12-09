@@ -5,5 +5,4 @@
 - https://jayneycoffee.location.rainclab.net/
 
 # iOS
-- 아래 레포를 참고해주세요.
 - https://github.com/kimjayney/e2e-location-client-ios
