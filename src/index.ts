@@ -44,7 +44,7 @@ export default {
 	  const url = new URL(request.url)
 	  const params = new URLSearchParams(url.search)
 	  const headers = new Headers({
-      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Origin": "jayneycoffee.location.rainclab.net", // Access-Control-Allow-Origin...뭘로고칠까..?ㅠㅠ
       "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     })
