@@ -44,7 +44,7 @@ export default {
 	  const url = new URL(request.url)
 	  const params = new URLSearchParams(url.search)
 	  const headers = new Headers({
-      "Access-Control-Allow-Origin": "jayneycoffee.location.rainclab.net", // Access-Control-Allow-Origin...뭘로고칠까..?ㅠㅠ
+      "Access-Control-Allow-Origin": "https://jayneycoffee.location.rainclab.net", // Access-Control-Allow-Origin...뭘로고칠까..?ㅠㅠ
       "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     })
@@ -85,7 +85,7 @@ export default {
     
     if (pathname === "/api/healthcheck") {
       const { results } = await env.DB.prepare(
-        `SELECT lat, lng, created_at, iv FROM Locations LIMIT 1,1`
+        `SELECT lat, lng, created_at, iv FROM Locations LIMIT 0,1`
       ).all();
      
       // const ip = await getIP()
