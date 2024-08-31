@@ -5,5 +5,5 @@ compatibility_date = "2023-04-29"
 
 [[ d1_databases ]]
 binding = "DB" # i.e. available in your Worker on env.DB
-database_name = "locationbackend-db"
-database_id = "e2f92d1e-c3f2-462c-804d-442ef858e70a"
+database_name = "jennycoffee_location"
+database_id = "c6bfa5fe-bdda-44dd-8034-b7bbd447d19c"
