@@ -7,6 +7,10 @@
 # iOS
 - https://github.com/kimjayney/e2e-location-client-ios
 
+# Android
+- https://github.com/kimjayney/e2e-location-client-android
+- 직접 본인이 Android studio 통해 컴파일 해서 사용 필요
+
 # CI/CD
 - Cloudflare Pages
 - Cloudflare Wrangler
