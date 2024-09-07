@@ -16,3 +16,4 @@
 -- )
  
 
+-- ALTER TABLE Locations ADD COLUMN ip_addr varchar(100);

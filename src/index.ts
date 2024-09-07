@@ -115,16 +115,18 @@ export default {
       const lng = decodeURIComponent(params.get('lng') ?? '');  
       const iv = params.get("iv")
       const created_at = returnCreatedTime()
-      
+      let a = '';  
+      var host = request.headers.get("host")
+
       const { results } = await env.DB.prepare(
         `SELECT * FROM Devices WHERE id = ? and authorization = ?`
       ).bind(device, authorization).all();
       
       if (results?.length > 0) {
         const { results } = await env.DB.prepare(
-          "INSERT INTO Locations(DeviceId, lat, lng, created_at, iv) VALUES(?, ?, ?, ?, ?)"
+          "INSERT INTO Locations(DeviceId, lat, lng, created_at, iv, ip_addr) VALUES(?, ?, ?, ?, ?, ?)"
         )
-        .bind(device, lat, lng, created_at, iv )
+        .bind(device, lat, lng, created_at, iv , host)
         .all();
         return new Response("201");
       } else {
@@ -154,7 +156,7 @@ export default {
           console.log(timeInterval)
         }
         const { results } = await env.DB.prepare(
-          `SELECT lat, lng, created_at, iv FROM Locations WHERE DeviceId = ? ${timeInterval} ORDER BY created_at DESC`
+          `SELECT lat, lng, created_at, iv, ip_addr FROM Locations WHERE DeviceId = ? ${timeInterval} ORDER BY created_at DESC`
         ).bind(device).all();
          
         return new Response(JSON.stringify({
