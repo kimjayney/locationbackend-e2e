@@ -116,7 +116,7 @@ export default {
       const iv = params.get("iv")
       const created_at = returnCreatedTime()
       let a = '';  
-      var host = request.headers.get("host")
+      var host = request.headers.get('CF-Connecting-IP')
 
       const { results } = await env.DB.prepare(
         `SELECT * FROM Devices WHERE id = ? and authorization = ?`
