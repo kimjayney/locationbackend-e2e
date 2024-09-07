@@ -21,17 +21,20 @@ function returnCreatedTime(expire_year = 0) {
   return `${dateString} ${timeString}`
 }
 
-function adjustTime(inputTime) {
+function adjustTime(inputTime, timezone) {
   // 입력된 시간을 Date 객체로 변환합니다.
   const inputDate = new Date(inputTime);
 
-  // -9시간을 밀리초 단위로 계산합니다.
-  const timeAdjustment = 9 * 60 * 60 * 1000;
+  // 타임존을 기준으로 UTC와의 차이를 계산합니다. (예: UTC+9 -> 9, UTC-5 -> -5)
+  const timeZoneOffsetHours = timezone;
 
-  // 입력된 시간에서 -9시간을 빼줍니다.
+  // 타임존 차이를 밀리초 단위로 변환합니다.
+  const timeAdjustment = timeZoneOffsetHours * 60 * 60 * 1000;
+
+  // 입력된 시간에서 타임존 차이만큼을 빼줍니다.
   const adjustedTime = new Date(inputDate.getTime() - timeAdjustment);
 
-  // 조정된 시간을 원하는 형식("YYYY-MM-DDTHH:mm:ss")으로 문자열로 변환하여 반환합니다.
+  // 조정된 시간을 원하는 형식("YYYY-MM-DD HH:mm:ss")으로 문자열로 변환하여 반환합니다.
   const adjustedTimeString = adjustedTime.toISOString().slice(0, 19).replace('T', ' ');
   return adjustedTimeString;
 }
@@ -149,8 +152,8 @@ export default {
           timeInterval = `AND created_at > datetime('now', '-${minutes} minutes')`;
         }
         if (params.has("startDate")) { 
-          const startDate = adjustTime(params.get("startDate"));
-          const endDate = adjustTime(params.get("endDate")); 
+          const startDate = adjustTime(params.get("startDate"), params.get("timezone"));
+          const endDate = adjustTime(params.get("endDate"), params.get("timezone")); 
           console.log(startDate, endDate)
           timeInterval = `AND created_at between '${startDate }' and '${endDate}'`
           console.log(timeInterval)
