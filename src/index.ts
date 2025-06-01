@@ -46,11 +46,25 @@ export default {
 	  const { pathname } = new URL(request.url);
 	  const url = new URL(request.url)
 	  const params = new URLSearchParams(url.search)
-	  const headers = new Headers({
-      "Access-Control-Allow-Origin": "https://jayneycoffee.location.rainclab.net", // Access-Control-Allow-Origin...뭘로고칠까..?ㅠㅠ
+    const allowedOrigins = [
+      "https://jayneycoffee.location.rainclab.net",
+      "http://localhost:8000"
+    ];
+
+    const origin = request.headers.get("Origin");
+    
+	  let headers = new Headers({
+      // "Access-Control-Allow-Origin": "https://jayneycoffee.location.rainclab.net", // Access-Control-Allow-Origin...뭘로고칠까..?ㅠㅠ
       "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     })
+    if (origin && allowedOrigins.includes(origin)) {
+      headers.set("Access-Control-Allow-Origin", origin);
+    }
+    // if (allowedOrigins.includes(origin)) {
+    //   headers.setHeader("Access-Control-Allow-Origin", origin);
+    // }
+    
     if (pathname === "/main") {
 
     }
