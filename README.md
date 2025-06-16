@@ -37,3 +37,8 @@ wrangler deploy
 ```
 wrangler dev --local
 ```
+
+# TBD
+- SQL Audit Log each user (Using Cloudflare  Analytics API)
+- 위치 데이터에 대해 조작 가능성을 줄이기 위해 이 기능을 추가할 예정입니다.
+- I plan to add this feature to reduce the possibility of manipulation of location data.
