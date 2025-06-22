@@ -38,7 +38,8 @@ wrangler deploy
 wrangler dev --local
 ```
 
-# TBD
-- SQL Audit Log each user (Using Cloudflare  Analytics API)
-- 위치 데이터에 대해 조작 가능성을 줄이기 위해 이 기능을 추가할 예정입니다.
-- I plan to add this feature to reduce the possibility of manipulation of location data.
+# Release Log
+## 2025-06-22
+- Add AuditLog Feature.
+- This feature will be available via Cloudflare API calls. 
+- It stores raw SQL in the AuditLogs table. Of course, location data is encrypted, so it’s safe.

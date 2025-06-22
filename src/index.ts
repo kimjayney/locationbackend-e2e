@@ -39,6 +39,18 @@ function adjustTime(inputTime, timezone) {
   return adjustedTimeString;
 }
 
+function interpolateSQL(sql, values) {
+  const escaped = [...values];
+  return sql.replace(/\?/g, () => {
+    const v = escaped.shift();
+    if (v === null || v === undefined) return 'NULL';
+    if (typeof v === 'string') return `'${v.replace(/'/g, "''")}'`;
+    if (typeof v === 'boolean') return v ? 'TRUE' : 'FALSE';
+    if (v instanceof Date) return `'${v.toISOString()}'`;
+    return v;
+  });
+}
+
 
 
 export default {
@@ -140,12 +152,25 @@ export default {
       ).bind(device, authorization).all();
       
       if (results?.length > 0) {
-        const { results } = await env.DB.prepare(
-          "INSERT INTO Locations(DeviceId, lat, lng, created_at, iv, ip_addr) VALUES(?, ?, ?, ?, ?, ?)"
-        )
-        .bind(device, lat, lng, created_at, iv , host)
-        .all();
-        return new Response("201");
+        const sql = "INSERT INTO Locations(DeviceId, lat, lng, created_at, iv, ip_addr) VALUES(?, ?, ?, ?, ?, ?)";
+        const boundValues = [device, lat, lng, created_at, iv, host];
+        // 2. Run Location script
+        const { results } = await env.DB.prepare(sql).bind(...boundValues).all();
+        const actualSql = interpolateSQL(sql, [...boundValues]);
+        // Audit purpose SQL Generate
+        const auditSql = interpolateSQL(
+          "INSERT INTO AuditLogs(query, created_at,device_id_v2) VALUES(?, ?, ?)",
+          [actualSql, new Date().toISOString(), device]
+        );
+
+        // SQL Audit script Logging
+        await env.DB.exec(auditSql);
+
+        // 5. Response Process
+        if (results?.length > 0) {
+          return new Response("201"); 
+        }
+         
       } else {
         // not auth
         return new Response("not");
