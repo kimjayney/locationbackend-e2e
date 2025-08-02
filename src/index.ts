@@ -50,6 +50,11 @@ function interpolateSQL(sql, values) {
     return v;
   });
 }
+type QueryMetadata= {
+  query : string
+  deviceId : string,
+  authCode : string
+}
 
 
 
@@ -62,6 +67,31 @@ export default {
       "https://jayneycoffee.location.rainclab.net",
       "http://localhost:8000"
     ];
+
+
+function authorizedPromiseReturn(metadata: QueryMetadata ) {
+ // Work on progress 
+  let authPromise = (deviceId, authCode) => new Promise((resolve, reject) => {
+    return env.DB.prepare("SELECT * FROM Devices WHERE id = ? and authorization = ?").bind(deviceId, authCode).all().then(
+      (row) => {resolve(row.results)} , 
+      (err) => {reject(err)}
+    );
+  }) 
+  let authPromiseResolved = () => {
+
+  }
+  let authPromiseRejected = () => {
+    return new Response(JSON.stringify({
+          success: false, 
+          status: false,
+          message_en_US:"failed",
+          message_ko_KR: "실패", 
+        }), {headers})
+  }
+  authPromise(metadata.deviceId, metadata.authCode).then(authPromiseResolved, authPromiseRejected)
+  
+}
+
 
     const origin = request.headers.get("Origin");
     
@@ -103,6 +133,25 @@ export default {
         )
         .bind(device, 'true', created_at, expired_at, authorization)
         .all()
+        const { resultsTableCreate } = await env.DB.prepare(
+          `CREATE TABLE Locations_${device} (
+          id integer PRIMARY KEY AUTOINCREMENT, 
+          DeviceId VARCHAR(40), 
+          lat TEXT, 
+          lng TEXT , 
+          IV TEXT, 
+          created_at DATETIME,
+          ip_addr VARCHAR(40),
+          FOREIGN KEY (DeviceId) REFERENCES Devices(id) ON DELETE CASCADE ON UPDATE CASCADE ON INSERT RESTRICT
+          )`).all()
+        if (resultsTableCreate) {
+          return new Response(JSON.stringify({
+          success: false, 
+          status: false,
+          message_en_US:"Success",
+          message_ko_KR: "뭔가 안된듯", 
+        }), {headers})
+        }
         return new Response(JSON.stringify({
           success: true, 
           status: true,
@@ -152,7 +201,7 @@ export default {
       ).bind(device, authorization).all();
       
       if (results?.length > 0) {
-        const sql = "INSERT INTO Locations(DeviceId, lat, lng, created_at, iv, ip_addr) VALUES(?, ?, ?, ?, ?, ?)";
+        const sql = `INSERT INTO Locations_${device}(DeviceId, lat, lng, created_at, iv, ip_addr) VALUES(?, ?, ?, ?, ?, ?)`;
         const boundValues = [device, lat, lng, created_at, iv, host];
         // 2. Run Location script
         const { results } = await env.DB.prepare(sql).bind(...boundValues).all();
@@ -161,8 +210,7 @@ export default {
         const auditSql = interpolateSQL(
           "INSERT INTO AuditLogs(query, created_at,device_id_v2) VALUES(?, ?, ?)",
           [actualSql, new Date().toISOString(), device]
-        );
-
+        ); 
         // SQL Audit script Logging
         await env.DB.exec(auditSql);
 
@@ -198,7 +246,7 @@ export default {
           console.log(timeInterval)
         }
         const { results } = await env.DB.prepare(
-          `SELECT lat, lng, created_at, iv, ip_addr FROM Locations WHERE DeviceId = ? ${timeInterval} ORDER BY created_at DESC`
+          `SELECT lat, lng, created_at, iv, ip_addr FROM Locations_${device} WHERE DeviceId = ? ${timeInterval} ORDER BY created_at DESC`
         ).bind(device).all();
          
         return new Response(JSON.stringify({
