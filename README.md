@@ -43,3 +43,6 @@ wrangler dev --local
 - Add AuditLog Feature.
 - This feature will be available via Cloudflare API calls. 
 - It stores raw SQL in the AuditLogs table. Of course, location data is encrypted, so it’s safe.
+
+## 2025-08-03
+- Add location table each user when registered.
