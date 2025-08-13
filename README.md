@@ -48,4 +48,4 @@ wrangler dev --local
 - Add location table each user when registered.
 
 ## 2025-08-13 
-- Add feature for control share location by user. (In progress)
+- Add feature for control share location by user. (Completed)

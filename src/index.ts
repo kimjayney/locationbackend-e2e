@@ -224,7 +224,58 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
         return new Response("not");
       }
 	  }
-    
+    if (pathname === '/api/sharecontrol') {
+      const device = params.get('device'); 
+      const authorization = params.get('authorization')
+      const sharecontrol = params.get('share')
+
+      const { results } = await env.DB.prepare(
+        `SELECT * FROM Devices WHERE id = ? and authorization = ?`
+      ).bind(device, authorization).all();
+      
+      if (results?.length > 0 ) {
+        let setShareControl;
+        if (sharecontrol === '1') {
+          setShareControl = 1;
+        } else if (sharecontrol === '0') {
+          setShareControl = 0;
+        } else {
+          return new Response(JSON.stringify({
+            success: false, 
+            status: false,
+            message_en_US:"invalid shareControl parameter. only 0 or 1.",
+            message_ko_KR: "shareControl 제어 값이 잘못 되었어요."
+          }), {headers})
+        } 
+        const sql = `UPDATE Devices set share_location = ? where id = ?`;
+        const boundValues = [setShareControl, device];
+        // 2. Run Location script
+        const { results } = await env.DB.prepare(sql).bind(...boundValues).all();
+        const actualSql = interpolateSQL(sql, [...boundValues]);
+        // Audit purpose SQL Generate
+        const auditSql = interpolateSQL(
+          "INSERT INTO AuditLogs(query, created_at,device_id_v2) VALUES(?, ?, ?)",
+          [actualSql, new Date().toISOString(), device]
+        );
+
+        // SQL Audit script Logging
+        await env.DB.exec(auditSql); 
+        return new Response(JSON.stringify({
+            success: true, 
+            status: true,
+            message_en_US:"Success.",
+            message_ko_KR: "shareControl 이 설정 되었어요."
+          }), {headers})
+
+      } else {
+        return new Response(JSON.stringify({
+          success: true, 
+          status: false,
+          message_en_US:"Device auth code problem.",
+          message_ko_KR: "디바이스 인증 코드가 잘못되었어요. "
+        }), {headers})
+      }
+    }
     if (pathname === '/api/view') {
       const device = params.get('device'); 
       const order = params.get("order")
