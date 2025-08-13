@@ -232,7 +232,9 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
       const { results } = await env.DB.prepare(
         `SELECT * FROM Devices WHERE id = ? and authorization = ?`
       ).bind(device, authorization).all();
+      
       if (results?.length > 0 ) {
+        if (results[0].share_location == 1) {
         let timeInterval = "";  // default to all intervals
         if (params.has("timeInterval")) {
           const minutes = parseInt(params.get("timeInterval") ?? '0');
@@ -248,7 +250,7 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
         const { results } = await env.DB.prepare(
           `SELECT lat, lng, created_at, iv, ip_addr FROM Locations_${device} WHERE DeviceId = ? ${timeInterval} ORDER BY created_at DESC`
         ).bind(device).all();
-         
+        
         return new Response(JSON.stringify({
           success: true, 
           status: true,
@@ -256,6 +258,15 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
           message_ko_KR: "Service ",
           data: results
         }), {headers})
+        } else {
+          return new Response(JSON.stringify({
+            success: false, 
+            status: false,
+            message_en_US:"Location Sharing is disabled by user.",
+            message_ko_KR: "디바이스 사용자가 위치 공유 기능을 잠시 끈 상태입니다."
+        }), {headers})
+        }
+        
         
         // return new Response(JSON.stringify(results), {headers})
       } else { 
