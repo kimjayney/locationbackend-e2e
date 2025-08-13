@@ -4,7 +4,7 @@
 --     is_enabled BOOLEAN,
 --     authorization VARCHAR(15),
 --     created_at DATETIME,
---     expired_at DATETIME
+--     expired_at DATETIME,  
 -- )
 
 -- CREATE TABLE AuditLogs (
@@ -25,3 +25,5 @@
 --     created_at DATETIME,
 --     FOREIGN KEY (DeviceId) REFERENCES Devices(id) ON DELETE CASCADE ON UPDATE CASCADE ON INSERT RESTRICT
 -- ); 
+
+-- ALTER TABLE Devices ADD COLUMN share_location INTEGER DEFAULT 0;
