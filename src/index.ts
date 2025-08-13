@@ -224,6 +224,31 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
         return new Response("not");
       }
 	  }
+    if (pathname === '/api/sharestatus') {
+      const device = params.get('device'); 
+      const authorization = params.get('authorization') 
+
+      const { results } = await env.DB.prepare(
+        `SELECT * FROM Devices WHERE id = ? and authorization = ?`
+      ).bind(device, authorization).all();
+      
+      if (results?.length > 0 ) {
+        return new Response(JSON.stringify({
+          success: true, 
+          status: false,
+          message_en_US: results[0].share_location,
+          message_ko_KR: results[0].share_location
+        }), {headers})
+
+      } else {
+        return new Response(JSON.stringify({
+          success: true, 
+          status: false,
+          message_en_US:"Device auth code problem.",
+          message_ko_KR: "디바이스 인증 코드가 잘못되었어요. "
+        }), {headers})
+      }
+    }
     if (pathname === '/api/sharecontrol') {
       const device = params.get('device'); 
       const authorization = params.get('authorization')
