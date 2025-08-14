@@ -119,6 +119,7 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
     if (pathname === "/api/device/register") {
       const device = params.get('device'); 
       const authorization = params.get("authorization")
+      const shareControlKey = params.get("shareControlKey")
       
       // device ID 검증 추가
       if (!device || !/^[a-zA-Z0-9]{1,20}$/.test(device)) {
@@ -144,9 +145,9 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
         const created_at = returnCreatedTime()
         const expired_at = returnCreatedTime(10)
         const { results } = await env.DB.prepare(
-          "INSERT INTO Devices(id, is_enabled, created_at, expired_at, authorization) VALUES(?, ?, ?, ?, ?)"
+          "INSERT INTO Devices(id, is_enabled, created_at, expired_at, authorization,shareControlKey) VALUES(?, ?, ?, ?, ?,?)"
         )
-        .bind(device, 'true', created_at, expired_at, authorization)
+        .bind(device, 'true', created_at, expired_at, authorization, shareControlKey)
         .all()
         const { resultsTableCreate } = await env.DB.prepare(
           `CREATE TABLE Locations_${device} (
@@ -268,10 +269,11 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
       const device = params.get('device'); 
       const authorization = params.get('authorization')
       const sharecontrol = params.get('share')
+      const shareControlKey = params.get('shareControlKey')
 
       const { results } = await env.DB.prepare(
-        `SELECT * FROM Devices WHERE id = ? and authorization = ?`
-      ).bind(device, authorization).all();
+        `SELECT * FROM Devices WHERE id = ? and authorization = ? and shareControlKey = ?`
+      ).bind(device, authorization, shareControlKey).all();
       
       if (results?.length > 0 ) {
         let setShareControl;
