@@ -111,10 +111,25 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
 
     }
     
+    if (pathname === "/api/device/setShareControlKey") {
+      const device = params.get('device'); 
+      const authorization = params.get("authorization")
+    }
     
     if (pathname === "/api/device/register") {
       const device = params.get('device'); 
       const authorization = params.get("authorization")
+      
+      // device ID 검증 추가
+      if (!device || !/^[a-zA-Z0-9]{1,20}$/.test(device)) {
+        return new Response(JSON.stringify({
+          success: false, 
+          status: false,
+          message_en_US: "Invalid device ID format",
+          message_ko_KR: "잘못된 기기 ID 형식입니다."
+        }), {headers})
+      }
+      
       const { results } = await env.DB.prepare(
         `SELECT * FROM Devices WHERE id = ?`
       ).bind(device).all();
@@ -312,35 +327,62 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
       if (results?.length > 0 ) {
         if (results[0].share_location == 1) {
         let timeInterval = "";  // default to all intervals
+        let bindParams = [device]; // 기본 파라미터는 device만
+        
         if (params.has("timeInterval")) {
           const minutes = parseInt(params.get("timeInterval") ?? '0');
-          timeInterval = `AND created_at > datetime('now', '-${minutes} minutes')`;
+          if (isNaN(minutes) || minutes < 0 || minutes > 10080) { // 1주일 제한
+            return new Response(JSON.stringify({
+              success: false,
+              status: false,
+              message_en_US: "Invalid timeInterval parameter",
+              message_ko_KR: "잘못된 시간 간격 파라미터입니다."
+            }), {headers})
+          }
+          timeInterval = `AND created_at > datetime('now', '-' || ? || ' minutes')`;
+          bindParams.push(minutes);
         }
+        
         if (params.has("startDate")) { 
           const startDate = adjustTime(params.get("startDate"), params.get("timezone"));
           const endDate = adjustTime(params.get("endDate"), params.get("timezone")); 
           console.log(startDate, endDate)
-          timeInterval = `AND created_at between '${startDate }' and '${endDate}'`
+          timeInterval = `AND created_at BETWEEN ? AND ?`;
+          bindParams.push(startDate, endDate);
           console.log(timeInterval)
         }
-        const { results } = await env.DB.prepare(
-          `SELECT lat, lng, created_at, iv, ip_addr FROM Locations_${device} WHERE DeviceId = ? ${timeInterval} ORDER BY created_at DESC`
-        ).bind(device).all();
-        
-        return new Response(JSON.stringify({
-          success: true, 
-          status: true,
-          message_en_US:"Service",
-          message_ko_KR: "Service ",
-          data: results
-        }), {headers})
-        } else {
+        let deviceExistQuery=`SELECT name FROM sqlite_master WHERE type='table' AND name LIKE ?` 
+        const tableResults = await env.DB.prepare(deviceExistQuery).bind(`%${device}%`).all(); 
+        if (tableResults.results.length > 0 ) {
+          const { results } = await env.DB.prepare(
+            `SELECT lat, lng, created_at, iv, ip_addr FROM Locations_${device} WHERE DeviceId = ? ${timeInterval} ORDER BY created_at DESC`
+          ).bind(...bindParams).all();
           return new Response(JSON.stringify({
-            success: false, 
-            status: false,
-            message_en_US:"Location Sharing is disabled by user.",
-            message_ko_KR: "디바이스 사용자가 위치 공유 기능을 잠시 끈 상태입니다."
-        }), {headers})
+            success: true,
+            status: true,
+            message_en_US: "Service",
+            message_ko_KR: "Service , this is new user",
+            data: results
+          }), { headers });
+        } else {
+            const {results } = await env.DB.prepare(
+              `SELECT lat, lng, created_at, iv, ip_addr FROM Locations WHERE DeviceId = ? ${timeInterval} ORDER BY created_at DESC`
+            ).bind(...bindParams).all();
+            return new Response(JSON.stringify({
+              success: true,
+              status: true,
+              message_en_US: "Service",
+              message_ko_KR: "Service , this is old user", 
+              data: results 
+            }), { headers });
+          } 
+        } else {
+            return new Response(JSON.stringify({
+              success: false, 
+              status: false,
+              message_en_US:"Location Sharing is disabled by user.",
+              message_ko_KR: "디바이스 사용자가 위치 공유 기능을 잠시 끈 상태입니다."
+          }), {headers})
         }
         
         
