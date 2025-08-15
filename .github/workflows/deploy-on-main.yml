@@ -52,17 +52,17 @@ jobs:
           export NO_D1_WARNING="true"
           export CI="true"
           
-          # 로컬 D1 데이터베이스 생성
-          echo "📦 로컬 D1 데이터베이스 생성 중..."
-          wrangler d1 create ci-test-db || echo "D1 생성 실패 (이미 존재할 수 있음)"
-          
-          # 스키마 적용
-          echo "📋 스키마 적용 중..."
-          wrangler d1 execute ci-test-db --file=schema.sql || echo "스키마 적용 실패"
-          
-          # 테이블 확인
-          echo "🔍 테이블 생성 확인..."
-          wrangler d1 execute ci-test-db --command "SELECT name FROM sqlite_master WHERE type='table'" || echo "테이블 확인 실패"
+                                    # 로컬 D1 데이터베이스 생성
+                          echo "📦 로컬 D1 데이터베이스 생성 중..."
+                          wrangler d1 create ci-test-db || echo "D1 생성 실패 (이미 존재할 수 있음)"
+                          
+                          # 스키마 적용 (DB_CI 바인딩 사용)
+                          echo "📋 스키마 적용 중..."
+                          wrangler d1 execute ci-test-db --file=schema.sql || echo "스키마 적용 실패"
+                          
+                          # 테이블 확인
+                          echo "🔍 테이블 생성 확인..."
+                          wrangler d1 execute ci-test-db --command "SELECT name FROM sqlite_master WHERE type='table'" || echo "테이블 확인 실패"
           
       - name: Start local server and run comprehensive tests
         run: |
