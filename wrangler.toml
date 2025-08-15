@@ -13,13 +13,13 @@ crons = []
 # 로컬 개발용 D1 데이터베이스 (실제 Cloudflare D1 사용)
 [[ d1_databases ]]
 binding = "DB"
-database_name = "test-location-db"
-database_id = "1b2b86d2-46d3-4850-95ae-791ac18d9c3d"
+database_name = "local-test-db"
+database_id = "bb9a9a77-ebac-4893-8c0e-7726f7af3409"
 
-# 로컬 개발용 D1 데이터베이스 (CI 환경에서 사용)
+# CI 환경용 D1 데이터베이스
 [[ d1_databases ]]
 binding = "DB"
-database_name = "test-location-db"
+database_name = "ci-test-db"
 database_id = "local"
 
 # Custom Domain 설정

@@ -75,12 +75,22 @@ jobs:
           # 로컬 서버 시작 (백그라운드)
           echo "🌐 로컬 서버 시작 중..."
           nohup wrangler dev --port 8787 > wrangler.log 2>&1 &
-          echo "⏳ 서버 시작 대기 중... (5초)"
-          sleep 5
+          SERVER_PID=$!
+          echo "⏳ 서버 시작 대기 중... (10초)"
+          sleep 10
           
           # 서버 상태 확인
           echo "📋 서버 상태 확인:"
-          ps aux | grep "wrangler dev" | grep -v grep || echo "서버가 실행되지 않음"
+          if ps -p $SERVER_PID > /dev/null; then
+            echo "✅ 서버가 실행 중입니다 (PID: $SERVER_PID)"
+            echo "📋 서버 로그:"
+            tail -20 wrangler.log || echo "로그 파일이 아직 생성되지 않음"
+          else
+            echo "❌ 서버가 실행되지 않았습니다"
+            echo "📋 서버 로그:"
+            cat wrangler.log || echo "로그 파일이 없습니다"
+            exit 1
+          fi
           
           # 종합 테스트 실행 (로컬 환경)
           echo "🧪 CI 환경 종합 테스트 시작..."
@@ -88,7 +98,7 @@ jobs:
           
           # 서버 중지
           echo "🛑 서버 중지..."
-          pkill -f "wrangler dev" || echo "서버가 이미 중지됨"
+          kill $SERVER_PID 2>/dev/null || echo "서버가 이미 중지됨"
           
       - name: Manual deployment only
         run: |
