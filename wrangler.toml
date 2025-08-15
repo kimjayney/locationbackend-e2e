@@ -16,11 +16,11 @@ binding = "DB_LOCAL"
 database_name = "local-test-db"
 database_id = "bb9a9a77-ebac-4893-8c0e-7726f7af3409"
 
-# CI 환경용 D1 데이터베이스 (배포 시에는 사용하지 않음)
-# [[ d1_databases ]]
-# binding = "DB_CI"
-# database_name = "ci-test-db"
-# database_id = "local"
+# CI 환경용 D1 데이터베이스
+[[ d1_databases ]]
+binding = "DB_CI"
+database_name = "ci-test-db"
+database_id = "local"
 
 # Custom Domain 설정
 [env.production]

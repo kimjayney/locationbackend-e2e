@@ -1,6 +1,7 @@
 
 export interface Env {
 	DB_LOCAL: D1Database;
+  DB_CI: D1Database;
 	DB_PROD: D1Database;
 }
 
@@ -131,7 +132,7 @@ type QueryMetadata= {
 export default {
 	async fetch(request: Request, env: Env) {
 	  // 환경별 바인딩 선택: 로컬 > 프로덕션 순서로 우선순위
-	  const db = env.DB_LOCAL || env.DB_PROD;
+	  const db = env.DB_CI || env.DB_LOCAL || env.DB_PROD;
 	  const { pathname } = new URL(request.url);
 	  const url = new URL(request.url)
 	  const params = new URLSearchParams(url.search)
