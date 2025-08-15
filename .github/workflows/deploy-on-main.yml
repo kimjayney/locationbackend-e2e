@@ -8,7 +8,7 @@ on:
 
 env:
   NODE_VERSION: '18'
-  WRANGLER_VERSION: '4.20.5'
+  WRANGLER_VERSION: '4.30.0'
 
 jobs:
   test-and-deploy:
@@ -44,7 +44,7 @@ jobs:
       - name: Deploy to Cloudflare Workers
         run: |
           echo "🚀 Cloudflare Workers 배포 시작..."
-          wrangler deploy --env production
+          wrangler publish --env production
           
       - name: Wait for deployment
         run: |

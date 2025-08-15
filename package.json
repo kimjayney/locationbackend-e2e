@@ -9,8 +9,8 @@
   "private": true,
   "scripts": {
     "start": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "deploy:prod": "wrangler deploy --env production",
+    "deploy": "wrangler publish",
+    "deploy:prod": "wrangler publish --env production",
     "test": "vitest",
     "test:local": "./test-only.sh local",
     "test:prod": "./test-only.sh production",
@@ -21,7 +21,7 @@
     "check:data": "./check-data.sh",
     "check:data:device": "./check-data.sh",
     "ci:test": "npm run comprehensive:local",
-    "ci:deploy": "wrangler deploy --env production",
+    "ci:deploy": "wrangler publish --env production",
     "ci:verify": "npm run comprehensive:prod"
   },
   "dependencies": {
