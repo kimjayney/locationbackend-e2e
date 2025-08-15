@@ -80,15 +80,6 @@ jobs:
           # 서버 중지
           echo "🛑 서버 중지..."
           pkill -f "wrangler dev" || echo "서버가 이미 중지됨"
-          
-      - name: Deploy to Cloudflare Workers
-        run: |
-          echo "🚀 Cloudflare Workers 배포 시작..."
-          export CLOUDFLARE_API_TOKEN="${{ secrets.CLOUDFLARE_API_TOKEN }}"
-          export CLOUDFLARE_ACCOUNT_ID="${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
-          export NO_D1_WARNING="true"
-          wrangler publish --env production
-          
       - name: Wait for deployment
         run: |
           echo "⏳ 배포 완료 대기 중... (10초)"
