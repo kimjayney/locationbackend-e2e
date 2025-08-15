@@ -2,8 +2,22 @@ name = "locationbackend"
 main = "src/index.ts"
 compatibility_date = "2023-04-29"
 
+[triggers]
+crons = []
 
 [[ d1_databases ]]
 binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "jennycoffee_location"
+database_id = "c6bfa5fe-bdda-44dd-8034-b7bbd447d19c"
+
+# Custom Domain 설정
+[env.production]
+name = "jayneycoffee-api"
+routes = [
+  "jayneycoffee.api.location.rainclab.net/*"
+]
+
+[[env.production.d1_databases]]
+binding = "DB"
 database_name = "jennycoffee_location"
 database_id = "c6bfa5fe-bdda-44dd-8034-b7bbd447d19c"

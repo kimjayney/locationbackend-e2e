@@ -201,7 +201,7 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
       
     }
 
-	  if (pathname === "/api/update") {
+	  if (pathname === '/api/update') {
       const device = params.get('device'); 
       const authorization = params.get('authorization')
 
@@ -234,12 +234,14 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
         if (results?.length > 0) {
           return new Response("201"); 
         }
+        return new Response("201"); // 성공 시 기본 응답
          
       } else {
         // not auth
         return new Response("not");
       }
-	  }
+    }
+
     if (pathname === '/api/sharestatus') {
       const device = params.get('device'); 
       const authorization = params.get('authorization') 
@@ -402,7 +404,7 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
     }
   
 	  return new Response(
-		  "jayney-coffee"
+		  `jayney-coffee${pathname}`
 	  );
 	},
   };
