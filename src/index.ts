@@ -8,7 +8,7 @@ export interface Env {
 // 길이 제한 상수 (AES-CBC-256 암호화 데이터 고려)
 const LENGTH_LIMITS = {
   DEVICE_ID: 40,           // 기기 ID 최대 길이
-  AUTHORIZATION: 15,        // 인증 코드 최대 길이
+  AUTHORIZATION: 40,        // 인증 코드 최대 길이 (15 → 40자로 증가)
   SHARE_CONTROL_KEY: 100,  // 공유 제어 키 최대 길이
   LAT: 120,                // 위도 (AES-CBC-256 암호화 + Base64, 최대 ~88자)
   LNG: 120,                // 경도 (AES-CBC-256 암호화 + Base64, 최대 ~88자)

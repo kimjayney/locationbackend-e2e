@@ -45,9 +45,9 @@ echo ""
 log_info "📋 2단계: 기기 등록"
 echo "----------------------------------------"
 
-# 테스트 데이터
+# 테스트 데이터 (authorization 길이 제한 40자 준수)
 TEST_DEVICE="test$(date +%s | tail -c 8)"
-TEST_AUTH="auth$(date +%s | tail -c 8)"
+TEST_AUTH="auth$(date +%s | tail -c 8)_$(date +%s | tail -c 8)_$(date +%s | tail -c 8)"
 
 # 기기 등록
 log_info "2.1 기기 등록"
