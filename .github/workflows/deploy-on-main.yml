@@ -1,0 +1,72 @@
+name: Deploy and Test on Main
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # 수동 실행도 가능
+
+env:
+  NODE_VERSION: '18'
+  WRANGLER_VERSION: '4.20.5'
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Install Wrangler
+        run: npm install -g wrangler@${{ env.WRANGLER_VERSION }}
+        
+      - name: Setup Cloudflare credentials
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          
+      - name: Run comprehensive tests (Local)
+        run: |
+          echo "🧪 로컬 환경 종합 테스트 시작..."
+          npm run comprehensive:local
+          
+      - name: Deploy to Cloudflare Workers
+        run: |
+          echo "🚀 Cloudflare Workers 배포 시작..."
+          wrangler deploy --env production
+          
+      - name: Wait for deployment
+        run: |
+          echo "⏳ 배포 완료 대기 중... (10초)"
+          sleep 10
+          
+      - name: Run production tests
+        run: |
+          echo "🧪 Production 환경 테스트 시작..."
+          npm run comprehensive:prod
+          
+      - name: Test data verification
+        run: |
+          echo "🔍 데이터베이스 데이터 확인..."
+          npm run check:data
+          
+      - name: Deployment summary
+        run: |
+          echo "========================================"
+          echo "🎉 배포 및 테스트 완료!"
+          echo "========================================"
+          echo "✅ 모든 테스트 통과"
+          echo "✅ Production 배포 완료"
+          echo "✅ 데이터 검증 완료"
+          echo "========================================"

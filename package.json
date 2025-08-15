@@ -18,7 +18,10 @@
     "comprehensive:local": "./comprehensive-test.sh local",
     "comprehensive:prod": "./comprehensive-test.sh production",
     "check:data": "./check-data.sh",
-    "check:data:device": "./check-data.sh"
+    "check:data:device": "./check-data.sh",
+    "ci:test": "npm run comprehensive:local",
+    "ci:deploy": "wrangler deploy --env production",
+    "ci:verify": "npm run comprehensive:prod"
   },
   "dependencies": {
     "http": "^0.0.1-security",

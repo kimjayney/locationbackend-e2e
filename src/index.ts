@@ -3,14 +3,14 @@ export interface Env {
 	DB: D1Database;
 }
 
-// 길이 제한 상수
+// 길이 제한 상수 (AES-CBC-256 암호화 데이터 고려)
 const LENGTH_LIMITS = {
   DEVICE_ID: 40,           // 기기 ID 최대 길이
   AUTHORIZATION: 15,        // 인증 코드 최대 길이
   SHARE_CONTROL_KEY: 100,  // 공유 제어 키 최대 길이
-  LAT: 100,                // 위도 (암호화된 값)
-  LNG: 100,                // 경도 (암호화된 값)
-  IV: 50,                  // 초기화 벡터
+  LAT: 120,                // 위도 (AES-CBC-256 암호화 + Base64, 최대 ~88자)
+  LNG: 120,                // 경도 (AES-CBC-256 암호화 + Base64, 최대 ~88자)
+  IV: 24,                  // 초기화 벡터 (16바이트 = Base64 24자)
   IP_ADDR: 45              // IP 주소 (IPv6 최대)
 };
 

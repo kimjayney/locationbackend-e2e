@@ -56,6 +56,27 @@ npm run check:data
 npm run check:data:device [device_id]
 ```
 
+## 🔄 CI/CD (GitHub Actions)
+
+### **자동 배포 및 테스트**
+
+Main 브랜치에 push할 때마다 자동으로:
+1. ✅ **로컬 환경 테스트 실행**
+2. ✅ **Production 환경 배포**
+3. ✅ **Production 환경 테스트 실행**
+4. ✅ **데이터베이스 검증**
+
+### **워크플로우 파일**
+- `.github/workflows/deploy-on-main.yml` - 자동 배포 및 테스트
+- `.github/workflows/test-on-push.yml` - 테스트 전용
+
+### **설정 방법**
+1. GitHub Secrets 설정:
+   - `CLOUDFLARE_API_TOKEN`
+   - `CLOUDFLARE_ACCOUNT_ID`
+2. Main 브랜치에 push하면 자동 실행
+3. [GitHub Actions 설정 가이드](.github/README.md) 참조
+
 ## 📁 스크립트 파일
 
 - `deploy-test.sh` - 배포 후 자동 테스트 실행
