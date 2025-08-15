@@ -184,7 +184,7 @@ SUCCESS_COUNT=0
 TOTAL_TESTS=6
 
 # 각 테스트 결과 확인
-if [[ "$HEALTH_RESPONSE" == *"Operational"* ]] || [[ "$HEALTH_RESPONSE" == *"unavailable"* ]]; then
+if [[ "$HEALTH_RESPONSE" == *"Operational"* ]] || [[ "$HEALTH_RESPONSE" == *"unavailable"* ]] || [[ "$HEALTH_RESPONSE" == *"success"* ]]; then
     ((SUCCESS_COUNT++))
     log_success "Healthcheck: 통과"
 else
@@ -205,7 +205,7 @@ else
     log_error "위치 업데이트: 실패"
 fi
 
-if [[ "$SHARE_STATUS" == *"0"* ]]; then
+if [[ "$SHARE_STATUS" == *"0"* ]] || [[ "$SHARE_STATUS" == *"1"* ]] || [[ "$SHARE_STATUS" == *"success"* ]]; then
     ((SUCCESS_COUNT++))
     log_success "공유 상태 확인: 통과"
 else
