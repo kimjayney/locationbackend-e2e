@@ -96,8 +96,8 @@ if [ "$ENV" = "local" ]; then
     # CI 환경에서는 로컬 D1 사용
     if [ -n "$CI" ]; then
         log_info "🔧 CI 환경: 로컬 D1 데이터베이스 사용"
-        D1_DB="test-location-db"
-        D1_FLAGS="--local"
+        D1_DB="ci-test-db"
+        D1_FLAGS=""
         WRANGLER_CONFIG=""
     else
         log_info "🔧 로컬 환경: 로컬 D1 데이터베이스 사용 (오프라인)"
@@ -181,14 +181,10 @@ log_info "📋 6단계: 테스트 결과 판단"
 echo "----------------------------------------"
 
 SUCCESS_COUNT=0
-if [ "$ENV" = "local" ]; then
-    TOTAL_TESTS=6
-else
-    TOTAL_TESTS=5  # Production에서는 D1 테스트 없음
-fi
+TOTAL_TESTS=6
 
 # 각 테스트 결과 확인
-if [[ "$HEALTH_RESPONSE" == *"Operational"* ]] || [[ "$HEALTH_RESPONSE" == *"unavailable"* ]] || [[ "$HEALTH_RESPONSE" == *"success"* ]]; then
+if [[ "$HEALTH_RESPONSE" == *"Operational"* ]] || [[ "$HEALTH_RESPONSE" == *"unavailable"* ]]; then
     ((SUCCESS_COUNT++))
     log_success "Healthcheck: 통과"
 else
@@ -209,7 +205,7 @@ else
     log_error "위치 업데이트: 실패"
 fi
 
-if [[ "$SHARE_STATUS" == *"0"* ]] || [[ "$SHARE_STATUS" == *"1"* ]] || [[ "$SHARE_STATUS" == *"success"* ]]; then
+if [[ "$SHARE_STATUS" == *"0"* ]]; then
     ((SUCCESS_COUNT++))
     log_success "공유 상태 확인: 통과"
 else
@@ -223,13 +219,11 @@ else
     log_error "공유 제어: 실패"
 fi
 
-if [ "$ENV" = "local" ]; then
-    if [[ "$SHARE_STATUS_AFTER" == *"1"* ]]; then
-        ((SUCCESS_COUNT++))
-        log_success "공유 상태 변경: 통과"
-    else
-        log_error "공유 상태 변경: 실패"
-    fi
+if [[ "$SHARE_STATUS_AFTER" == *"1"* ]]; then
+    ((SUCCESS_COUNT++))
+    log_success "공유 상태 변경: 통과"
+else
+    log_error "공유 상태 변경: 실패"
 fi
 
 echo ""
