@@ -37,10 +37,32 @@ jobs:
           export CLOUDFLARE_ACCOUNT_ID="${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
           echo "✅ 인증 정보 설정 완료"
           
+      - name: Start local Wrangler server
+        run: |
+          echo "🚀 로컬 Wrangler 서버 시작..."
+          export CLOUDFLARE_API_TOKEN="${{ secrets.CLOUDFLARE_API_TOKEN }}"
+          export CLOUDFLARE_ACCOUNT_ID="${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
+          nohup wrangler dev --port 8787 > wrangler.log 2>&1 &
+          echo "⏳ 서버 시작 대기 중... (5초)"
+          sleep 5
+          echo "📋 서버 로그 확인:"
+          cat wrangler.log || echo "로그 파일이 아직 생성되지 않음"
+          echo "🔍 프로세스 확인:"
+          ps aux | grep wrangler || echo "프로세스가 실행되지 않음"
+          
       - name: Run comprehensive tests (Local)
         run: |
           echo "🧪 로컬 환경 종합 테스트 시작..."
+          export CLOUDFLARE_API_TOKEN="${{ secrets.CLOUDFLARE_API_TOKEN }}"
+          export CLOUDFLARE_ACCOUNT_ID="${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
           npm run comprehensive:local
+          
+      - name: Stop local server
+        run: |
+          echo "🛑 로컬 서버 중지..."
+          pkill -f "wrangler dev" || echo "서버가 이미 중지됨"
+          echo "📋 최종 서버 로그:"
+          cat wrangler.log || echo "로그 파일이 없음"
           
       - name: Deploy to Cloudflare Workers
         run: |
@@ -57,11 +79,15 @@ jobs:
       - name: Run production tests
         run: |
           echo "🧪 Production 환경 테스트 시작..."
+          export CLOUDFLARE_API_TOKEN="${{ secrets.CLOUDFLARE_API_TOKEN }}"
+          export CLOUDFLARE_ACCOUNT_ID="${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
           npm run comprehensive:prod
           
       - name: Test data verification
         run: |
           echo "🔍 데이터베이스 데이터 확인..."
+          export CLOUDFLARE_API_TOKEN="${{ secrets.CLOUDFLARE_API_TOKEN }}"
+          export CLOUDFLARE_ACCOUNT_ID="${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
           npm run check:data
           
       - name: Deployment summary
@@ -69,7 +95,8 @@ jobs:
           echo "========================================"
           echo "🎉 배포 및 테스트 완료!"
           echo "========================================"
-          echo "✅ 모든 테스트 통과"
+          echo "✅ 로컬 테스트 완료"
           echo "✅ Production 배포 완료"
+          echo "✅ Production 테스트 완료"
           echo "✅ 데이터 검증 완료"
           echo "========================================"
