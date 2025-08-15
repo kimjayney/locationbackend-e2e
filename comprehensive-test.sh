@@ -39,12 +39,12 @@ ENV=${1:-local}
 WORKER_NAME="locationbackend"
 CUSTOM_DOMAIN="https://jayneycoffee.api.location.rainclab.net"
 
-# 테스트 데이터
-TEST_DEVICE="test_device_$(date +%s)"
-TEST_AUTH="test_auth_$(date +%s)"
+# 테스트 데이터 (길이 제한 준수 + 형식 준수)
+TEST_DEVICE="test$(date +%s | tail -c 8)"
+TEST_AUTH="auth$(date +%s | tail -c 8)"
 TEST_LAT="37.5665"
 TEST_LNG="126.9780"
-TEST_IV="test_iv_$(date +%s)"
+TEST_IV="iv$(date +%s | tail -c 8)"
 
 log_info "🚀 종합 테스트 시작 (환경: $ENV)"
 echo ""

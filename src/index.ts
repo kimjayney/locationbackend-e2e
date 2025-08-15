@@ -2,6 +2,75 @@
 export interface Env {
 	DB: D1Database;
 }
+
+// 길이 제한 상수
+const LENGTH_LIMITS = {
+  DEVICE_ID: 40,           // 기기 ID 최대 길이
+  AUTHORIZATION: 15,        // 인증 코드 최대 길이
+  SHARE_CONTROL_KEY: 100,  // 공유 제어 키 최대 길이
+  LAT: 100,                // 위도 (암호화된 값)
+  LNG: 100,                // 경도 (암호화된 값)
+  IV: 50,                  // 초기화 벡터
+  IP_ADDR: 45              // IP 주소 (IPv6 최대)
+};
+
+// 길이 검증 함수
+function validateLength(value: string | null, maxLength: number, fieldName: string): string | null {
+  if (!value) return null;
+  if (value.length > maxLength) {
+    throw new Error(`${fieldName} 길이가 너무 깁니다. 최대 ${maxLength}자까지 허용됩니다.`);
+  }
+  return value;
+}
+
+// 길이 검증 및 에러 응답 생성 함수
+function validateAndRespond(params: URLSearchParams, requiredFields: string[]): { [key: string]: string } | null {
+  const validated: { [key: string]: string } = {};
+  
+  try {
+    for (const field of requiredFields) {
+      const value = params.get(field);
+      if (!value) {
+        return {
+          success: false,
+          message_en_US: `Missing required field: ${field}`,
+          message_ko_KR: `필수 필드가 누락되었습니다: ${field}`
+        };
+      }
+      
+      // 길이 검증
+      switch (field) {
+        case 'device':
+          validated[field] = validateLength(value, LENGTH_LIMITS.DEVICE_ID, 'Device ID') || '';
+          break;
+        case 'authorization':
+          validated[field] = validateLength(value, LENGTH_LIMITS.AUTHORIZATION, 'Authorization') || '';
+          break;
+        case 'shareControlKey':
+          validated[field] = validateLength(value, LENGTH_LIMITS.SHARE_CONTROL_KEY, 'Share Control Key') || '';
+          break;
+        case 'lat':
+          validated[field] = validateLength(value, LENGTH_LIMITS.LAT, 'Latitude') || '';
+          break;
+        case 'lng':
+          validated[field] = validateLength(value, LENGTH_LIMITS.LNG, 'Longitude') || '';
+          break;
+        case 'iv':
+          validated[field] = validateLength(value, LENGTH_LIMITS.IV, 'IV') || '';
+          break;
+        default:
+          validated[field] = value;
+      }
+    }
+    return null; // 검증 성공
+  } catch (error) {
+    return {
+      success: false,
+      message_en_US: error instanceof Error ? error.message : 'Validation error',
+      message_ko_KR: '데이터 검증 오류가 발생했습니다.'
+    };
+  }
+}
  
 export async function getIP(): Promise<string> {
   const response = await fetch('https://api.ipify.org');
@@ -117,12 +186,18 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
     }
     
     if (pathname === "/api/device/register") {
-      const device = params.get('device'); 
-      const authorization = params.get("authorization")
-      const shareControlKey = params.get("shareControlKey")
+      // 길이 검증
+      const validation = validateAndRespond(params, ['device', 'authorization', 'shareControlKey']);
+      if (validation) {
+        return new Response(JSON.stringify(validation), { headers });
+      }
       
-      // device ID 검증 추가
-      if (!device || !/^[a-zA-Z0-9]{1,20}$/.test(device)) {
+      const device = params.get('device')!; 
+      const authorization = params.get("authorization")!;
+      const shareControlKey = params.get("shareControlKey")!;
+      
+      // device ID 형식 검증 (기존 로직 유지)
+      if (!/^[a-zA-Z0-9]{1,20}$/.test(device)) {
         return new Response(JSON.stringify({
           success: false, 
           status: false,
@@ -202,14 +277,18 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
     }
 
 	  if (pathname === '/api/update') {
-      const device = params.get('device'); 
-      const authorization = params.get('authorization')
-
-      const lat = decodeURIComponent(params.get('lat') ?? '' );
-      const lng = decodeURIComponent(params.get('lng') ?? '');  
-      const iv = params.get("iv")
+      // 길이 검증
+      const validation = validateAndRespond(params, ['device', 'authorization', 'lat', 'lng', 'iv']);
+      if (validation) {
+        return new Response(JSON.stringify(validation), { headers });
+      }
+      
+      const device = params.get('device')!; 
+      const authorization = params.get('authorization')!;
+      const lat = decodeURIComponent(params.get('lat')!);
+      const lng = decodeURIComponent(params.get('lng')!);  
+      const iv = params.get("iv")!;
       const created_at = returnCreatedTime()
-      let a = '';  
       var host = request.headers.get('CF-Connecting-IP')
 
       const { results } = await env.DB.prepare(
@@ -268,10 +347,16 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
       }
     }
     if (pathname === '/api/sharecontrol') {
-      const device = params.get('device'); 
-      const authorization = params.get('authorization')
-      const sharecontrol = params.get('share')
-      const shareControlKey = params.get('shareControlKey')
+      // 길이 검증
+      const validation = validateAndRespond(params, ['device', 'authorization', 'shareControlKey']);
+      if (validation) {
+        return new Response(JSON.stringify(validation), { headers });
+      }
+      
+      const device = params.get('device')!; 
+      const authorization = params.get('authorization')!;
+      const sharecontrol = params.get('share');
+      const shareControlKey = params.get('shareControlKey')!;
 
       const { results } = await env.DB.prepare(
         `SELECT * FROM Devices WHERE id = ? and authorization = ? and shareControlKey = ?`
