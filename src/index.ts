@@ -131,6 +131,8 @@ type QueryMetadata= {
 
 export default {
 	async fetch(request: Request, env: Env) {
+	  // CI 환경에서는 DB_CI 바인딩 사용, 로컬에서는 DB_LOCAL 바인딩 사용
+	  const db = env.DB_CI || db;
 	  const { pathname } = new URL(request.url);
 	  const url = new URL(request.url)
 	  const params = new URLSearchParams(url.search)
@@ -143,7 +145,7 @@ export default {
 function authorizedPromiseReturn(metadata: QueryMetadata ) {
  // Work on progress 
   let authPromise = (deviceId, authCode) => new Promise((resolve, reject) => {
-    return env.DB_LOCAL.prepare("SELECT * FROM Devices WHERE id = ? and authorization = ?").bind(deviceId, authCode).all().then(
+    return db.prepare("SELECT * FROM Devices WHERE id = ? and authorization = ?").bind(deviceId, authCode).all().then(
       (row) => {resolve(row.results)} , 
       (err) => {reject(err)}
     );
@@ -208,7 +210,7 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
         }), {headers})
       }
       
-      const { results } = await env.DB_LOCAL.prepare(
+      const { results } = await db.prepare(
         `SELECT * FROM Devices WHERE id = ?`
       ).bind(device).all();
       if(results?.length > 0) {
@@ -221,12 +223,12 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
       } else {
         const created_at = returnCreatedTime()
         const expired_at = returnCreatedTime(10)
-        const { results } = await env.DB_LOCAL.prepare(
+        const { results } = await db.prepare(
           "INSERT INTO Devices(id, is_enabled, created_at, expired_at, authorization,shareControlKey) VALUES(?, ?, ?, ?, ?,?)"
         )
         .bind(device, 'true', created_at, expired_at, authorization, shareControlKey)
         .all()
-        const { resultsTableCreate } = await env.DB_LOCAL.prepare(
+        const { resultsTableCreate } = await db.prepare(
           `CREATE TABLE Locations_${device} (
           id integer PRIMARY KEY AUTOINCREMENT, 
           DeviceId VARCHAR(40), 
@@ -257,7 +259,7 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
     if (pathname === "/api/healthcheck") {
       try {
         // 간단한 테이블 존재 여부 확인
-        const { results } = await env.DB_LOCAL.prepare(
+        const { results } = await db.prepare(
           `SELECT name FROM sqlite_master WHERE type='table' AND name='Devices' LIMIT 1`
         ).all();
         
@@ -301,7 +303,7 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
       const created_at = returnCreatedTime()
       var host = request.headers.get('CF-Connecting-IP')
 
-      const { results } = await env.DB_LOCAL.prepare(
+      const { results } = await db.prepare(
         `SELECT * FROM Devices WHERE id = ? and authorization = ?`
       ).bind(device, authorization).all();
       
@@ -309,7 +311,7 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
         const sql = `INSERT INTO Locations_${device}(DeviceId, lat, lng, created_at, iv, ip_addr) VALUES(?, ?, ?, ?, ?, ?)`;
         const boundValues = [device, lat, lng, created_at, iv, host];
         // 2. Run Location script
-        const { results } = await env.DB_LOCAL.prepare(sql).bind(...boundValues).all();
+        const { results } = await db.prepare(sql).bind(...boundValues).all();
         const actualSql = interpolateSQL(sql, [...boundValues]);
         // Audit purpose SQL Generate
         const auditSql = interpolateSQL(
@@ -317,7 +319,7 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
           [actualSql, new Date().toISOString(), device]
         ); 
         // SQL Audit script Logging
-        await env.DB_LOCAL.exec(auditSql);
+        await db.exec(auditSql);
 
         // 5. Response Process
         if (results?.length > 0) {
@@ -335,7 +337,7 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
       const device = params.get('device'); 
       const authorization = params.get('authorization') 
 
-      const { results } = await env.DB_LOCAL.prepare(
+      const { results } = await db.prepare(
         `SELECT * FROM Devices WHERE id = ? and authorization = ?`
       ).bind(device, authorization).all();
       
@@ -368,7 +370,7 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
       const sharecontrol = params.get('share');
       const shareControlKey = params.get('shareControlKey')!;
 
-      const { results } = await env.DB_LOCAL.prepare(
+      const { results } = await db.prepare(
         `SELECT * FROM Devices WHERE id = ? and authorization = ? and shareControlKey = ?`
       ).bind(device, authorization, shareControlKey).all();
       
@@ -389,7 +391,7 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
         const sql = `UPDATE Devices set share_location = ? where id = ?`;
         const boundValues = [setShareControl, device];
         // 2. Run Location script
-        const { results } = await env.DB_LOCAL.prepare(sql).bind(...boundValues).all();
+        const { results } = await db.prepare(sql).bind(...boundValues).all();
         const actualSql = interpolateSQL(sql, [...boundValues]);
         // Audit purpose SQL Generate
         const auditSql = interpolateSQL(
@@ -398,7 +400,7 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
         );
 
         // SQL Audit script Logging
-        await env.DB_LOCAL.exec(auditSql); 
+        await db.exec(auditSql); 
         return new Response(JSON.stringify({
             success: true, 
             status: true,
@@ -419,7 +421,7 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
       const device = params.get('device'); 
       const order = params.get("order")
       const authorization = params.get('authorization')
-      const { results } = await env.DB_LOCAL.prepare(
+      const { results } = await db.prepare(
         `SELECT * FROM Devices WHERE id = ? and authorization = ?`
       ).bind(device, authorization).all();
       
@@ -451,9 +453,9 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
           console.log(timeInterval)
         }
         let deviceExistQuery=`SELECT name FROM sqlite_master WHERE type='table' AND name LIKE ?` 
-        const tableResults = await env.DB_LOCAL.prepare(deviceExistQuery).bind(`%${device}%`).all(); 
+        const tableResults = await db.prepare(deviceExistQuery).bind(`%${device}%`).all(); 
         if (tableResults.results.length > 0 ) {
-          const { results } = await env.DB_LOCAL.prepare(
+          const { results } = await db.prepare(
             `SELECT lat, lng, created_at, iv, ip_addr FROM Locations_${device} WHERE DeviceId = ? ${timeInterval} ORDER BY created_at DESC`
           ).bind(...bindParams).all();
           return new Response(JSON.stringify({
@@ -464,7 +466,7 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
             data: results
           }), { headers });
         } else {
-            const {results } = await env.DB_LOCAL.prepare(
+            const {results } = await db.prepare(
               `SELECT lat, lng, created_at, iv, ip_addr FROM Locations WHERE DeviceId = ? ${timeInterval} ORDER BY created_at DESC`
             ).bind(...bindParams).all();
             return new Response(JSON.stringify({
