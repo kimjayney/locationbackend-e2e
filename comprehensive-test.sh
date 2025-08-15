@@ -183,10 +183,13 @@ echo "----------------------------------------"
 SUCCESS_COUNT=0
 TOTAL_TESTS=6
 
+log_info "디버깅: TOTAL_TESTS = $TOTAL_TESTS"
+
 # 각 테스트 결과 확인
+log_info "디버깅: Healthcheck 응답 = '$HEALTH_RESPONSE'"
 if [[ "$HEALTH_RESPONSE" == *"Operational"* ]] || [[ "$HEALTH_RESPONSE" == *"unavailable"* ]] || [[ "$HEALTH_RESPONSE" == *"success"* ]]; then
     ((SUCCESS_COUNT++))
-    log_success "Healthcheck: 통과"
+    log_success "Healthcheck: 통과 (SUCCESS_COUNT = $SUCCESS_COUNT)"
 else
     log_error "Healthcheck: 실패"
 fi
@@ -231,10 +234,14 @@ echo "========================================"
 echo "테스트 결과: $SUCCESS_COUNT/$TOTAL_TESTS 통과"
 echo "========================================"
 
+log_info "디버깅: 최종 SUCCESS_COUNT = $SUCCESS_COUNT, TOTAL_TESTS = $TOTAL_TESTS"
+
 if [ $SUCCESS_COUNT -eq $TOTAL_TESTS ]; then
     log_success "🎉 모든 테스트 통과!"
+    log_info "디버깅: exit 0으로 종료"
     exit 0
 else
     log_error "❌ 일부 테스트 실패"
+    log_info "디버깅: exit 1로 종료"
     exit 1
 fi
