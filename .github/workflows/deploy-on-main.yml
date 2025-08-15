@@ -37,32 +37,30 @@ jobs:
           export CLOUDFLARE_ACCOUNT_ID="${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
           echo "✅ 인증 정보 설정 완료"
           
-      - name: Start local Wrangler server
+      - name: Start server and run tests
         run: |
-          echo "🚀 로컬 Wrangler 서버 시작..."
+          echo "🚀 로컬 서버 시작 및 테스트 실행..."
           export CLOUDFLARE_API_TOKEN="${{ secrets.CLOUDFLARE_API_TOKEN }}"
           export CLOUDFLARE_ACCOUNT_ID="${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
+          
+          # 서버를 백그라운드로 시작하고 5초 대기 후 테스트 실행
           nohup wrangler dev --port 8787 > wrangler.log 2>&1 &
           echo "⏳ 서버 시작 대기 중... (5초)"
           sleep 5
-          echo "📋 서버 로그 확인:"
-          cat wrangler.log || echo "로그 파일이 아직 생성되지 않음"
-          echo "🔍 프로세스 확인:"
-          ps aux | grep wrangler || echo "프로세스가 실행되지 않음"
           
-      - name: Run comprehensive tests (Local)
-        run: |
+          # 서버 상태 확인
+          echo "📋 서버 상태 확인:"
+          ps aux | grep wrangler || echo "프로세스가 실행되지 않음"
+          echo "📋 서버 로그:"
+          cat wrangler.log || echo "로그 파일이 아직 생성되지 않음"
+          
+          # 테스트 실행
           echo "🧪 로컬 환경 종합 테스트 시작..."
-          export CLOUDFLARE_API_TOKEN="${{ secrets.CLOUDFLARE_API_TOKEN }}"
-          export CLOUDFLARE_ACCOUNT_ID="${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
           npm run comprehensive:local
           
-      - name: Stop local server
-        run: |
-          echo "🛑 로컬 서버 중지..."
+          # 서버 중지
+          echo "🛑 서버 중지..."
           pkill -f "wrangler dev" || echo "서버가 이미 중지됨"
-          echo "📋 최종 서버 로그:"
-          cat wrangler.log || echo "로그 파일이 없음"
           
       - name: Deploy to Cloudflare Workers
         run: |
