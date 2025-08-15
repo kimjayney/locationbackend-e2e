@@ -31,8 +31,10 @@ jobs:
       - name: Install Wrangler v4
         run: |
           echo "📦 Wrangler v4.30.0 설치 중..."
-          npm install -g wrangler@4.30.0
+          npm install -g wrangler@4.30.0 || npm install -g wrangler@latest
           echo "✅ Wrangler 설치 완료: $(wrangler --version)"
+          echo "📋 Wrangler 버전 확인:"
+          wrangler --version
         
       - name: Setup Cloudflare credentials
         run: |
@@ -45,6 +47,11 @@ jobs:
       - name: Manual deployment only
         run: |
           echo "🚀 수동 배포 모드 - 테스트는 건너뜀"
+          echo "📋 현재 환경 정보:"
+          echo "   Node.js: $(node --version)"
+          echo "   npm: $(npm --version)"
+          echo "   Wrangler: $(wrangler --version)"
+          echo ""
           echo "📋 배포를 위해서는 수동으로 다음 명령어를 실행하세요:"
           echo "   wrangler publish"
           echo "   또는"
