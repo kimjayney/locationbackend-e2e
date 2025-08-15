@@ -171,27 +171,38 @@ if [ "$ENV" = "local" ]; then
     log_info "📋 3단계: 데이터베이스 확인 (로컬)"
     echo "----------------------------------------"
     
+    # CI 환경에서는 로컬 D1 사용
+    if [ -n "$CI" ]; then
+        log_info "🔧 CI 환경: 로컬 D1 데이터베이스 사용"
+        D1_DB="test-location-db"
+        D1_FLAGS="--local"
+    else
+        log_info "🔧 로컬 환경: 실제 D1 데이터베이스 사용"
+        D1_DB="jennycoffee_location"
+        D1_FLAGS=""
+    fi
+    
     # 테이블 목록 확인
     log_info "3.1 테이블 목록 확인"
-    TABLES=$(wrangler d1 execute jennycoffee_location --command "SELECT name FROM sqlite_master WHERE type='table'")
+    TABLES=$(wrangler d1 execute $D1_DB $D1_FLAGS --command "SELECT name FROM sqlite_master WHERE type='table'" 2>/dev/null || echo "데이터베이스 연결 실패")
     echo "   테이블: $TABLES"
     echo ""
     
     # Devices 테이블 확인
     log_info "3.2 Devices 테이블 확인"
-    DEVICES=$(wrangler d1 execute jennycoffee_location --command "SELECT id, authorization, created_at FROM Devices WHERE id = '$TEST_DEVICE'")
+    DEVICES=$(wrangler d1 execute $D1_DB $D1_FLAGS --command "SELECT id, authorization, created_at FROM Devices WHERE id = '$TEST_DEVICE'" 2>/dev/null || echo "데이터베이스 연결 실패")
     echo "   기기 정보: $DEVICES"
     echo ""
     
     # 위치 데이터 확인
     log_info "3.3 위치 데이터 확인"
-    LOCATIONS=$(wrangler d1 execute jennycoffee_location --command "SELECT DeviceId, lat, lng, created_at FROM Locations_$TEST_DEVICE")
+    LOCATIONS=$(wrangler d1 execute $D1_DB $D1_FLAGS --command "SELECT DeviceId, lat, lng, created_at FROM Locations_$TEST_DEVICE" 2>/dev/null || echo "데이터베이스 연결 실패")
     echo "   위치 데이터: $LOCATIONS"
     echo ""
     
     # 감사 로그 확인
     log_info "3.4 감사 로그 확인"
-    AUDIT_LOGS=$(wrangler d1 execute jennycoffee_location --command "SELECT COUNT(*) as count FROM AuditLogs WHERE device_id_v2 = '$TEST_DEVICE'")
+    AUDIT_LOGS=$(wrangler d1 execute $D1_DB $D1_FLAGS --command "SELECT COUNT(*) as count FROM AuditLogs WHERE device_id_v2 = '$TEST_DEVICE'" 2>/dev/null || echo "데이터베이스 연결 실패")
     echo "   감사 로그 수: $AUDIT_LOGS"
     echo ""
     

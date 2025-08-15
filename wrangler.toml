@@ -15,6 +15,12 @@ binding = "DB" # i.e. available in your Worker on env.DB
 database_name = "jennycoffee_location"
 database_id = "c6bfa5fe-bdda-44dd-8034-b7bbd447d19c"
 
+# 로컬 개발용 D1 데이터베이스 (CI 환경에서 사용)
+[[ d1_databases ]]
+binding = "DB"
+database_name = "test-location-db"
+database_id = "local"
+
 # Custom Domain 설정
 [env.production]
 name = "jayneycoffee-api"
