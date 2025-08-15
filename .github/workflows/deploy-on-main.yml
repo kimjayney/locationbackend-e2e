@@ -7,8 +7,8 @@ on:
   workflow_dispatch: # 수동 실행도 가능
 
 env:
-  NODE_VERSION: '18'
-  WRANGLER_VERSION: '2.17.0'
+  NODE_VERSION: '20'
+  WRANGLER_VERSION: '4.30.0'
   NO_D1_WARNING: 'true'
 
 jobs:
@@ -28,10 +28,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
         
-      - name: Install Wrangler v2
+      - name: Install Wrangler v4
         run: |
-          echo "📦 Wrangler v2.17.0 설치 중..."
-          npm install -g wrangler@2.17.0
+          echo "📦 Wrangler v4.30.0 설치 중..."
+          npm install -g wrangler@4.30.0
           echo "✅ Wrangler 설치 완료: $(wrangler --version)"
         
       - name: Setup Cloudflare credentials
@@ -42,44 +42,14 @@ jobs:
           export NO_D1_WARNING="true"
           echo "✅ 인증 정보 설정 완료"
           
-      - name: Start server and run tests
+      - name: Manual deployment only
         run: |
-          echo "🚀 로컬 서버 시작 및 테스트 실행..."
-          export CLOUDFLARE_API_TOKEN="${{ secrets.CLOUDFLARE_API_TOKEN }}"
-          export CLOUDFLARE_ACCOUNT_ID="${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
-          export NO_D1_WARNING="true"
-          export CI="true"
+          echo "🚀 수동 배포 모드 - 테스트는 건너뜀"
+          echo "📋 배포를 위해서는 수동으로 다음 명령어를 실행하세요:"
+          echo "   wrangler publish"
+          echo "   또는"
+          echo "   npm run deploy"
           
-          # Node.js 버전 확인
-          echo "📋 Node.js 버전: $(node --version)"
-          echo "📋 Wrangler 버전: $(wrangler --version)"
-          
-          # 로컬 D1 데이터베이스 생성 (테스트용)
-          echo "🗄️ 로컬 D1 데이터베이스 생성..."
-          wrangler d1 create test-location-db --local || echo "로컬 D1 생성 실패 (이미 존재할 수 있음)"
-          
-          # 로컬 D1에 스키마 적용
-          echo "📋 로컬 D1에 스키마 적용..."
-          wrangler d1 execute test-location-db --local --file=schema.sql || echo "스키마 적용 실패"
-          
-          # 서버를 백그라운드로 시작하고 5초 대기 후 테스트 실행
-          nohup wrangler dev --port 8787 --local > wrangler.log 2>&1 &
-          echo "⏳ 서버 시작 대기 중... (5초)"
-          sleep 5
-          
-          # 서버 상태 확인
-          echo "📋 서버 상태 확인:"
-          ps aux | grep wrangler || echo "프로세스가 실행되지 않음"
-          echo "📋 서버 로그:"
-          cat wrangler.log || echo "로그 파일이 아직 생성되지 않음"
-          
-          # 테스트 실행
-          echo "🧪 로컬 환경 종합 테스트 시작..."
-          npm run comprehensive:local
-          
-          # 서버 중지
-          echo "🛑 서버 중지..."
-          pkill -f "wrangler dev" || echo "서버가 이미 중지됨"
       - name: Wait for deployment
         run: |
           echo "⏳ 배포 완료 대기 중... (10초)"

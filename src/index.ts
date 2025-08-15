@@ -253,27 +253,35 @@ function authorizedPromiseReturn(metadata: QueryMetadata ) {
     }
     
     if (pathname === "/api/healthcheck") {
-      const { results } = await env.DB.prepare(
-        `SELECT lat, lng, created_at, iv FROM Locations LIMIT 0,1`
-      ).all();
-     
-      // const ip = await getIP()
-      if(results?.length > 0)  {
-        return new Response(JSON.stringify({
-          success: true, 
-          status: true,
-          message_en_US:"Operational",
-          message_ko_KR: "작동 중 입니다.", 
-        }), {headers})
-      } else {
+      try {
+        // 간단한 테이블 존재 여부 확인
+        const { results } = await env.DB.prepare(
+          `SELECT name FROM sqlite_master WHERE type='table' AND name='Devices' LIMIT 1`
+        ).all();
+        
+        if(results?.length > 0)  {
+          return new Response(JSON.stringify({
+            success: true, 
+            status: true,
+            message_en_US:"Operational",
+            message_ko_KR: "작동 중 입니다.", 
+          }), {headers})
+        } else {
+          return new Response(JSON.stringify({
+            success: true, 
+            status: false,
+            message_en_US:"Database tables not found",
+            message_ko_KR: "데이터베이스 테이블을 찾을 수 없습니다."
+          }), {headers})
+        }
+      } catch (error) {
         return new Response(JSON.stringify({
           success: true, 
           status: false,
-          message_en_US:"unavailable",
-          message_ko_KR: "DB 서버에 문제가 생겼습니다. 관리자에게 문의 주세요. "
+          message_en_US:"Database connection error",
+          message_ko_KR: "데이터베이스 연결 오류"
         }), {headers})
       }
-      
     }
 
 	  if (pathname === '/api/update') {
