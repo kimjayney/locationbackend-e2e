@@ -100,18 +100,25 @@ jobs:
           echo "🛑 서버 중지..."
           kill $SERVER_PID 2>/dev/null || echo "서버가 이미 중지됨"
           
-      - name: Manual deployment only
+      - name: Deploy to Cloudflare (if tests passed)
+        if: success()  # 이전 단계가 성공했을 때만 실행
         run: |
-          echo "🚀 수동 배포 모드 - 테스트는 건너뜀"
+          echo "🚀 테스트 성공! Cloudflare에 자동 배포 시작..."
+          export CLOUDFLARE_API_TOKEN="${{ secrets.CLOUDFLARE_API_TOKEN }}"
+          export CLOUDFLARE_ACCOUNT_ID="${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
+          export NO_D1_WARNING="true"
+          
           echo "📋 현재 환경 정보:"
           echo "   Node.js: $(node --version)"
           echo "   npm: $(npm --version)"
           echo "   Wrangler: $(wrangler --version)"
           echo ""
-          echo "📋 배포를 위해서는 수동으로 다음 명령어를 실행하세요:"
-          echo "   wrangler publish"
-          echo "   또는"
-          echo "   npm run deploy"
+          
+          # 로컬 환경으로 배포 (기본 환경)
+          echo "🌐 로컬 환경으로 배포 중..."
+          wrangler deploy
+          
+          echo "✅ 배포 완료!"
           
       - name: Wait for deployment
         run: |
@@ -121,9 +128,12 @@ jobs:
       - name: Deployment summary
         run: |
           echo "========================================"
-          echo "🎉 CI 환경 테스트 완료!"
+          echo "🎉 CI/CD 파이프라인 완료!"
           echo "========================================"
           echo "✅ 로컬 D1 데이터베이스 구축 완료"
           echo "✅ 로컬 서버 테스트 완료"
           echo "✅ 종합 테스트 완료"
+          echo "✅ Cloudflare 자동 배포 완료"
+          echo "========================================"
+          echo "🌐 배포된 URL: https://locationbackend.rainclab.workers.dev"
           echo "========================================"
