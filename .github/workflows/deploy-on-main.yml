@@ -114,9 +114,9 @@ jobs:
           echo "   Wrangler: $(wrangler --version)"
           echo ""
           
-          # 로컬 환경으로 배포 (기본 환경)
-          echo "🌐 로컬 환경으로 배포 중..."
-          wrangler deploy
+          # 프로덕션 환경으로 배포
+          echo "🌐 프로덕션 환경으로 배포 중..."
+          wrangler deploy --env production
           
           echo "✅ 배포 완료!"
           
@@ -133,7 +133,7 @@ jobs:
           echo "✅ 로컬 D1 데이터베이스 구축 완료"
           echo "✅ 로컬 서버 테스트 완료"
           echo "✅ 종합 테스트 완료"
-          echo "✅ Cloudflare 자동 배포 완료"
+          echo "✅ Cloudflare 프로덕션 자동 배포 완료"
           echo "========================================"
-          echo "🌐 배포된 URL: https://locationbackend.rainclab.workers.dev"
+          echo "🌐 배포된 URL: https://jayneycoffee.api.location.rainclab.net"
           echo "========================================"
