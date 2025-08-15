@@ -12,13 +12,13 @@ crons = []
 
 # 로컬 개발용 D1 데이터베이스 (실제 Cloudflare D1 사용)
 [[ d1_databases ]]
-binding = "DB"
+binding = "DB_LOCAL"
 database_name = "local-test-db"
 database_id = "bb9a9a77-ebac-4893-8c0e-7726f7af3409"
 
 # CI 환경용 D1 데이터베이스
 [[ d1_databases ]]
-binding = "DB"
+binding = "DB_CI"
 database_name = "ci-test-db"
 database_id = "local"
 
@@ -31,6 +31,6 @@ routes = [
 
 # Production 환경에서 실제 D1 데이터베이스 사용
 [[env.production.d1_databases]]
-binding = "DB"
+binding = "DB_PROD"
 database_name = "jennycoffee_location"
 database_id = "c6bfa5fe-bdda-44dd-8034-b7bbd447d19c"
