@@ -1,0 +1,13 @@
+name = "locationbackend-local"
+main = "src/index.ts"
+compatibility_date = "2023-04-29"
+
+# 로컬 개발용 D1 데이터베이스 (완전 오프라인)
+[[ d1_databases ]]
+binding = "DB"
+database_name = "local-test-db"
+database_id = "bb9a9a77-ebac-4893-8c0e-7726f7af3409"
+
+# 로컬 개발 서버 설정
+[dev]
+port = 8787

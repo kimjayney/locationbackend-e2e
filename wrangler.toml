@@ -10,10 +10,11 @@ CLOUDFLARE_ACCOUNT_ID = ""
 [triggers]
 crons = []
 
+# 로컬 개발용 D1 데이터베이스 (실제 Cloudflare D1 사용)
 [[ d1_databases ]]
-binding = "DB" # i.e. available in your Worker on env.DB
-database_name = "jennycoffee_location"
-database_id = "c6bfa5fe-bdda-44dd-8034-b7bbd447d19c"
+binding = "DB"
+database_name = "test-location-db"
+database_id = "1b2b86d2-46d3-4850-95ae-791ac18d9c3d"
 
 # 로컬 개발용 D1 데이터베이스 (CI 환경에서 사용)
 [[ d1_databases ]]
@@ -28,6 +29,7 @@ routes = [
   "jayneycoffee.api.location.rainclab.net/*"
 ]
 
+# Production 환경에서 실제 D1 데이터베이스 사용
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "jennycoffee_location"
