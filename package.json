@@ -8,8 +8,17 @@
   "private": true,
   "scripts": {
     "start": "wrangler dev",
-    "deploy": "wrangler publish",
-    "test": "vitest"
+    "deploy": "wrangler deploy",
+    "deploy:prod": "wrangler deploy --env production",
+    "test": "vitest",
+    "test:local": "./test-only.sh local",
+    "test:prod": "./test-only.sh production",
+    "deploy:test:local": "./deploy-test.sh local",
+    "deploy:test:prod": "./deploy-test.sh production",
+    "comprehensive:local": "./comprehensive-test.sh local",
+    "comprehensive:prod": "./comprehensive-test.sh production",
+    "check:data": "./check-data.sh",
+    "check:data:device": "./check-data.sh"
   },
   "dependencies": {
     "http": "^0.0.1-security",
