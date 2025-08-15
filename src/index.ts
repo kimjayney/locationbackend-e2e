@@ -131,8 +131,8 @@ type QueryMetadata= {
 
 export default {
 	async fetch(request: Request, env: Env) {
-	  // CI 환경에서는 DB_CI 바인딩 사용, 로컬에서는 DB_LOCAL 바인딩 사용
-	  const db = env.DB_CI || db;
+	  // 환경별 바인딩 선택: CI > 로컬 > 프로덕션 순서로 우선순위
+	  const db = env.DB_CI || env.DB_LOCAL || env.DB_PROD;
 	  const { pathname } = new URL(request.url);
 	  const url = new URL(request.url)
 	  const params = new URLSearchParams(url.search)
