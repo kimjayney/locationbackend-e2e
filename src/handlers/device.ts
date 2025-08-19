@@ -1,4 +1,4 @@
-import { jsonResponse, validateAndRespond, returnCreatedTime } from '../utils';
+import { jsonResponse, validateAndRespond, returnCreatedTime, sanitizeDeviceId, validateDeviceId } from '../utils';
 
 export async function handleRegister(params: URLSearchParams, db: D1Database, headers: Headers) {
   const validation = validateAndRespond(params, ['device', 'authorization', 'shareControlKey']);
@@ -8,7 +8,8 @@ export async function handleRegister(params: URLSearchParams, db: D1Database, he
   const authorization = params.get("authorization")!;
   const shareControlKey = params.get("shareControlKey")!;
 
-  if (!/^[a-zA-Z0-9]{1,20}$/.test(device)) {
+  // 기기 ID 검증 및 정제
+  if (!validateDeviceId(device)) {
     return jsonResponse({
       success: false,
       status: false,
@@ -16,6 +17,9 @@ export async function handleRegister(params: URLSearchParams, db: D1Database, he
       message_ko_KR: "잘못된 기기 ID 형식입니다."
     }, headers);
   }
+
+  // 특수문자 제거된 안전한 기기 ID
+  const sanitizedDevice = sanitizeDeviceId(device);
 
   const { results } = await db.prepare(`SELECT * FROM Devices WHERE id = ?`).bind(device).all();
   if (results?.length > 0) {
@@ -33,8 +37,10 @@ export async function handleRegister(params: URLSearchParams, db: D1Database, he
       "INSERT INTO Devices(id, is_enabled, created_at, expired_at, authorization, shareControlKey) VALUES(?, ?, ?, ?, ?, ?)"
     ).bind(device, 'true', created_at, expired_at, authorization, shareControlKey).all();
 
+    // 안전한 테이블명 생성 (특수문자 제거)
+    const safeTableName = `Locations_${sanitizedDevice}`;
     await db.prepare(
-      `CREATE TABLE IF NOT EXISTS Locations_${device} (
+      `CREATE TABLE IF NOT EXISTS ${safeTableName} (
         id integer PRIMARY KEY AUTOINCREMENT, 
         DeviceId VARCHAR(40), 
         lat TEXT, 

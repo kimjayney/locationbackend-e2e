@@ -1,4 +1,4 @@
-import { jsonResponse, adjustTime } from '../utils';
+import { jsonResponse, adjustTime, sanitizeDeviceId } from '../utils';
 
 export async function handleView(params: URLSearchParams, db: D1Database, headers: Headers) {
   const device = params.get('device');
@@ -35,9 +35,14 @@ export async function handleView(params: URLSearchParams, db: D1Database, header
         bindParams.push(startDate, endDate);
       }
       
-      let deviceExistQuery = `SELECT name FROM sqlite_master WHERE type='table' AND name LIKE ?`;
-      const tableResults = await db.prepare(deviceExistQuery).bind(`%${device}%`).all();
-      let queryTable = tableResults.results.length > 0 ? `Locations_${device}` : `Locations`;
+      // 안전한 테이블명 생성 (특수문자 제거)
+      const sanitizedDevice = sanitizeDeviceId(device!);
+      const safeTableName = `Locations_${sanitizedDevice}`;
+      
+      // 테이블 존재 여부 확인 (안전한 테이블명 사용)
+      let deviceExistQuery = `SELECT name FROM sqlite_master WHERE type='table' AND name = ?`;
+      const tableResults = await db.prepare(deviceExistQuery).bind(safeTableName).all();
+      let queryTable = tableResults.results.length > 0 ? safeTableName : 'Locations';
       
       const { results: locResults } = await db.prepare(
         `SELECT lat, lng, created_at, iv, ip_addr FROM ${queryTable} WHERE DeviceId = ? ${timeInterval} ORDER BY created_at DESC`
@@ -47,7 +52,7 @@ export async function handleView(params: URLSearchParams, db: D1Database, header
         success: true,
         status: true,
         message_en_US: "Service",
-        message_ko_KR: queryTable === `Locations_${device}` ? "Service , this is new user" : "Service , this is old user",
+        message_ko_KR: queryTable === safeTableName ? "Service , this is new user" : "Service , this is old user",
         data: locResults
       }, headers);
     } else {

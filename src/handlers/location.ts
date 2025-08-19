@@ -1,4 +1,4 @@
-import { validateAndRespond, returnCreatedTime, interpolateSQL } from '../utils';
+import { validateAndRespond, returnCreatedTime, interpolateSQL, sanitizeDeviceId } from '../utils';
 
 export async function handleUpdate(params: URLSearchParams, db: D1Database, headers: Headers, request: Request) {
   const validation = validateAndRespond(params, ['device', 'authorization', 'lat', 'lng', 'iv']);
@@ -17,7 +17,9 @@ export async function handleUpdate(params: URLSearchParams, db: D1Database, head
   ).bind(device, authorization).all();
 
   if (results?.length > 0) {
-    const sql = `INSERT INTO Locations_${device}(DeviceId, lat, lng, created_at, iv, ip_addr) VALUES(?, ?, ?, ?, ?, ?)`;
+    // 안전한 테이블명 생성 (특수문자 제거)
+    const safeTableName = `Locations_${sanitizeDeviceId(device)}`;
+    const sql = `INSERT INTO ${safeTableName}(DeviceId, lat, lng, created_at, iv, ip_addr) VALUES(?, ?, ?, ?, ?, ?)`;
     const boundValues = [device, lat, lng, created_at, iv, host];
     
     await db.prepare(sql).bind(...boundValues).all();

@@ -1,6 +1,17 @@
 import { ALLOWED_ORIGINS, LENGTH_LIMITS } from './constants';
 import type { ApiResponse, ValidationError } from './types';
 
+// ===== 보안 유틸리티 함수 =====
+export function sanitizeDeviceId(deviceId: string): string {
+  // 영문자와 숫자만 허용, 특수문자 제거
+  return deviceId.replace(/[^a-zA-Z0-9]/g, '');
+}
+
+export function validateDeviceId(deviceId: string): boolean {
+  // 영문자와 숫자만 허용, 길이 제한
+  return /^[a-zA-Z0-9]{1,20}$/.test(deviceId);
+}
+
 // ===== 유틸리티 함수 =====
 export function jsonResponse(obj: any, headers: Headers, status = 200) {
   return new Response(JSON.stringify(obj), { headers, status });
@@ -65,7 +76,7 @@ export function validateAndRespond(params: URLSearchParams, requiredFields: stri
   } catch (error) {
     return {
       success: false,
-      message_en_US: error instanceof Error ? error.message : 'Validation error',
+      message_en_US: 'Validation error',
       message_ko_KR: '데이터 검증 오류가 발생했습니다.'
     };
   }
