@@ -27,3 +27,5 @@ CREATE TABLE Locations (
     ip_addr VARCHAR(100),
     FOREIGN KEY (DeviceId) REFERENCES Devices(id) ON DELETE CASCADE ON UPDATE CASCADE ON INSERT RESTRICT
 );
+
+alter table Devices ADD column ip_collect boolean;
