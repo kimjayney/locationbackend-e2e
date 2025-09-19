@@ -22,5 +22,6 @@ export const API_ROUTES = {
   UPDATE: "/api/update",
   VIEW: "/api/view",
   SHARE_STATUS: "/api/sharestatus",
-  SHARE_CONTROL: "/api/sharecontrol"
+  SHARE_CONTROL: "/api/sharecontrol",
+  VERIFY: "/api/recaptcha"
 } as const;

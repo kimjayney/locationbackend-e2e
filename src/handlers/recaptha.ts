@@ -1,0 +1,60 @@
+import { jsonResponse } from '../utils';
+
+export async function handleRecaptha(
+  params: URLSearchParams,
+  _db: D1Database, // DB는 사용 안 하지만 시그니처 맞춤
+  headers: Headers,
+  env: { RECAPTCHA_SECRET: string }
+) {
+  try {
+    const token = params.get("g-recaptcha-response");
+
+    if (!token) {
+      return jsonResponse({
+        success: false,
+        status: false,
+        message_en_US: "Missing reCAPTCHA token",
+        message_ko_KR: "reCAPTCHA 토큰이 없습니다."
+      }, headers, 400);
+    }
+
+    // 구글 reCAPTCHA 검증
+    const verifyURL = "https://www.google.com/recaptcha/api/siteverify";
+    const formData = new URLSearchParams();
+    formData.append("secret", env.RECAPTCHA_SECRET);
+    formData.append("response", token);
+
+    const googleRes = await fetch(verifyURL, {
+      method: "POST",
+      body: formData
+    });
+
+    const result = await googleRes.json<any>();
+
+    if (result.success) {
+      return jsonResponse({
+        success: true,
+        status: true,
+        message_en_US: "reCAPTCHA verification success",
+        message_ko_KR: "reCAPTCHA 인증 성공",
+        data: result
+      }, headers);
+    } else {
+      return jsonResponse({
+        success: false,
+        status: false,
+        message_en_US: "reCAPTCHA verification failed",
+        message_ko_KR: "reCAPTCHA 인증 실패",
+        data: result
+      }, headers, 400);
+    }
+  } catch (err: any) {
+    return jsonResponse({
+      success: false,
+      status: false,
+      message_en_US: "Server error",
+      message_ko_KR: "서버 에러가 발생했습니다.",
+      error: err.message
+    }, headers, 500);
+  }
+}

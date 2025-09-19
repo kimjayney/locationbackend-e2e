@@ -4,3 +4,4 @@ export { handleHealthCheck } from './health';
 export { handleUpdate } from './location';
 export { handleView } from './view';
 export { handleShareStatus, handleShareControl } from './share';
+export { handleRecaptha } from './recaptha';
