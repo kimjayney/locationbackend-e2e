@@ -101,6 +101,15 @@ jobs:
           kill $SERVER_PID 2>/dev/null || echo "서버가 이미 중지됨"
           
       - name: Deploy to Cloudflare (if tests passed)
+        if: success()
+        run: |
+          echo "🔐 프로덕션 환경에 RECAPTCHA_SECRET 설정..."
+          export CLOUDFLARE_API_TOKEN="${{ secrets.CLOUDFLARE_API_TOKEN }}"
+          export CLOUDFLARE_ACCOUNT_ID="${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
+          npx wrangler secret put RECAPTCHA_SECRET --env production <<< "${{ secrets.RECAPTCHA_SECRET }}"
+          echo "✅ 시크릿 설정 완료."
+          
+      - name: Deploy to Cloudflare (if tests passed)
         if: success()  # 이전 단계가 성공했을 때만 실행
         run: |
           echo "🚀 테스트 성공! Cloudflare에 자동 배포 시작..."

@@ -30,7 +30,9 @@ jobs:
       - name: Run comprehensive tests
         run: |
           echo "🧪 종합 테스트 시작..."
-          npm run comprehensive:local
+          npm run comprehensive:local # 이 명령어는 env 블록 밖으로 이동해야 합니다.
+        env:
+          RECAPTCHA_SECRET: ${{ secrets.RECAPTCHA_SECRET }} # 환경 변수 설정
           
       - name: Test summary
         run: |

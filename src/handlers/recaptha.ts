@@ -4,7 +4,7 @@ export async function handleRecaptha(
   params: URLSearchParams,
   _db: D1Database, // DB는 사용 안 하지만 시그니처 맞춤
   headers: Headers,
-  env: { RECAPTCHA_SECRET: string }
+  secret: string
 ) {
   try {
     const token = params.get("g-recaptcha-response");
@@ -21,7 +21,7 @@ export async function handleRecaptha(
     // 구글 reCAPTCHA 검증
     const verifyURL = "https://www.google.com/recaptcha/api/siteverify";
     const formData = new URLSearchParams();
-    formData.append("secret", env.RECAPTCHA_SECRET);
+    formData.append("secret", secret);
     formData.append("response", token);
 
     const googleRes = await fetch(verifyURL, {

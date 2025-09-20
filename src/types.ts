@@ -2,6 +2,7 @@ export interface Env {
   DB_LOCAL: D1Database;
   DB_CI: D1Database;
   DB_PROD: D1Database;
+  RECAPTCHA_SECRET: string;
 }
 
 export interface ApiResponse {
