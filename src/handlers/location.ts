@@ -16,9 +16,9 @@ export async function handleUpdate(params: URLSearchParams, db: D1Database, head
     `SELECT * FROM Devices WHERE id = ? and authorization = ?`
   ).bind(device, authorization).all();
   
-  if (results?.ip_collect == 1) {
-    host = "verifiedUser"
-  }
+   if (results?.[0]?.ip_collect === 1) {
+      host = "verifiedUser";
+    }
 
   if (results?.length > 0) {
     // 안전한 테이블명 생성 (특수문자 제거)
