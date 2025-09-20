@@ -9,7 +9,7 @@ export async function handleRecaptha(
   try {
     const token = params.get("g-recaptcha-response");
     
-    const device = params.get('device')!;
+    const device = params.get('deviceId')!;
     const authorization = params.get("authorization")!;
     if (!token) {
       return jsonResponse({
