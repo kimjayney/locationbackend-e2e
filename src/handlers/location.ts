@@ -10,11 +10,15 @@ export async function handleUpdate(params: URLSearchParams, db: D1Database, head
   const lng = decodeURIComponent(params.get('lng')!);
   const iv = params.get("iv")!;
   const created_at = returnCreatedTime();
-  const host = request.headers.get('CF-Connecting-IP');
+  let host = request.headers.get('CF-Connecting-IP');
 
   const { results } = await db.prepare(
     `SELECT * FROM Devices WHERE id = ? and authorization = ?`
   ).bind(device, authorization).all();
+  
+  if (results?.ip_collect == 1) {
+    host = "verifiedUser"
+  }
 
   if (results?.length > 0) {
     // 안전한 테이블명 생성 (특수문자 제거)

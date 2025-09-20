@@ -39,6 +39,11 @@ export async function handleRecaptha(
     const result = await googleRes.json<any>();
 
     if (result.success) {
+      
+      const sql = `UPDATE Devices SET ip_collect = ? WHERE id = ?`;
+      const boundValues = [1, device];
+      await db.prepare(sql).bind(...boundValues).all();
+
       return jsonResponse({
         success: true,
         status: true,
