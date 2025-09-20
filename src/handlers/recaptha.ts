@@ -2,7 +2,7 @@ import { jsonResponse } from '../utils';
 
 export async function handleRecaptha(
   params: URLSearchParams,
-  _db: D1Database, // DB는 사용 안 하지만 시그니처 맞춤
+  db: D1Database, // DB는 사용 안 하지만 시그니처 맞춤
   headers: Headers,
   secret: string
 ) {
