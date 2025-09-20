@@ -8,7 +8,9 @@ export async function handleRecaptha(
 ) {
   try {
     const token = params.get("g-recaptcha-response");
-
+    
+    const device = params.get('device')!;
+    const authorization = params.get("authorization")!;
     if (!token) {
       return jsonResponse({
         success: false,
@@ -17,7 +19,12 @@ export async function handleRecaptha(
         message_ko_KR: "reCAPTCHA 토큰이 없습니다."
       }, headers, 400);
     }
+    const { results } = await db.prepare(
+      `SELECT * FROM Devices WHERE id = ? and authorization = ?`
+    ).bind(device, authorization).all();
 
+      if (results?.length > 0) {
+        
     // 구글 reCAPTCHA 검증
     const verifyURL = "https://www.google.com/recaptcha/api/siteverify";
     const formData = new URLSearchParams();
@@ -48,6 +55,15 @@ export async function handleRecaptha(
         data: result
       }, headers, 400);
     }
+      } else {
+        return jsonResponse({
+      success: false,
+      status: false,
+      message_en_US: "Invalid device id",
+      message_ko_KR: "디바이스 인증키가 잘못되었어요.", 
+    }, headers, 500);
+      }
+
   } catch (err: any) {
     return jsonResponse({
       success: false,
@@ -56,5 +72,8 @@ export async function handleRecaptha(
       message_ko_KR: "서버 에러가 발생했습니다.",
       error: err.message
     }, headers, 500);
+
+
+    
   }
 }
