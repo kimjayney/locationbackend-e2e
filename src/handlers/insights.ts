@@ -12,8 +12,7 @@ export async function handleInsights(
   params: URLSearchParams,
   env: Env,  
   headers: Headers 
-) {
-  try {
+) { 
     // wrangler d1 insights --timePeriod=1d 와 동일하게 지난 24시간을 설정합니다.
     const now = new Date();
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
@@ -73,14 +72,5 @@ export async function handleInsights(
     const insights = json.data?.viewer?.accounts[0]?.d1AnalyticsAdaptiveGroups || [];
 
     return jsonResponse({ success: true, data: insights }, headers, 200);
-
-  } catch (err: any) {
-    return jsonResponse({
-      success: false,
-      status: false,
-      message_en_US: "Server error",
-      message_ko_KR: "서버 에러가 발생했습니다.",
-      error: err.message
-    }, headers, 500); 
-  }
+ 
 }
