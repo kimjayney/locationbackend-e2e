@@ -8,7 +8,8 @@ import {
   handleView,
   handleShareStatus,
   handleShareControl,
-  handleRecaptha
+  handleRecaptha,
+  handleInsights
 } from './handlers';
 
 export default {
@@ -42,6 +43,8 @@ export default {
 
       case API_ROUTES.VERIFY:
         return await handleRecaptha(params, db, headers, env.RECAPTCHA_SECRET) 
+      case API_ROUTES.INSIGHTS:
+        return await handleInsights(params, db, headers)
       default:
         return new Response(`jayney-coffee${pathname}`, { headers });
     }

@@ -5,3 +5,4 @@ export { handleUpdate } from './location';
 export { handleView } from './view';
 export { handleShareStatus, handleShareControl } from './share';
 export { handleRecaptha } from './recaptha';
+export { handleInsights } from './insights';

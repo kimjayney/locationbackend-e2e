@@ -23,5 +23,6 @@ export const API_ROUTES = {
   VIEW: "/api/view",
   SHARE_STATUS: "/api/sharestatus",
   SHARE_CONTROL: "/api/sharecontrol",
-  VERIFY: "/api/recaptcha"
+  VERIFY: "/api/recaptcha", 
+  INSIGHTS: "/api/insights"
 } as const;
