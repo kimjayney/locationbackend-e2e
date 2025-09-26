@@ -13,6 +13,7 @@ export async function handleInsights(
   env: Env,  
   headers: Headers 
 ) { 
+  try {
     // wrangler d1 insights --timePeriod=1d 와 동일하게 지난 24시간을 설정합니다.
     const now = new Date();
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
@@ -73,4 +74,11 @@ export async function handleInsights(
 
     return jsonResponse({ success: true, data: insights }, headers, 200);
  
+  } catch (err: any) {
+    return jsonResponse({
+      success: false,
+      error: err.message,
+      code: 500
+    }, headers, 500);
+  }
 }

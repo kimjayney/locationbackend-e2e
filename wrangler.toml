@@ -28,6 +28,9 @@ name = "jayneycoffee-api"
 routes = [
   "jayneycoffee.api.location.rainclab.net/*"
 ]
+[env.production.vars]
+# 분석할 D1 데이터베이스의 ID를 환경 변수로 추가
+D1_DATABASE_ID = "c6bfa5fe-bdda-44dd-8034-b7bbd447d19c"
 
 # Production 환경에서 실제 D1 데이터베이스 사용
 [[env.production.d1_databases]]
