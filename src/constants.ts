@@ -18,6 +18,8 @@ export const ALLOWED_ORIGINS = [
 // API 엔드포인트 경로
 export const API_ROUTES = {
   DEVICE_REGISTER: "/api/device/register",
+  DEVICE_REGISTER_NOTIFICATION_TARGET: "/api/device/register-notification-target",
+  DEVICE_GET_NOTIFICATION_TARGETS: "/api/device/notification-targets",
   HEALTH_CHECK: "/api/healthcheck",
   UPDATE: "/api/update",
   VIEW: "/api/view",

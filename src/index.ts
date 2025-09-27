@@ -3,13 +3,15 @@ import { API_ROUTES } from './constants';
 import { createHeaders } from './utils';
 import {
   handleRegister,
+  handleRegisterNotificationTarget,
+  handleGetNotificationTargets,
   handleHealthCheck,
   handleUpdate,
   handleView,
   handleShareStatus,
   handleShareControl,
   handleRecaptha,
-  handleInsights
+  handleInsights,
 } from './handlers';
 
 export default {
@@ -25,6 +27,12 @@ export default {
     switch (pathname) {
       case API_ROUTES.DEVICE_REGISTER:
         return await handleRegister(params, db, headers);
+
+      case API_ROUTES.DEVICE_REGISTER_NOTIFICATION_TARGET:
+        return await handleRegisterNotificationTarget(params, db, headers);
+
+      case API_ROUTES.DEVICE_GET_NOTIFICATION_TARGETS:
+        return await handleGetNotificationTargets(params, db, headers);
         
       case API_ROUTES.HEALTH_CHECK:
         return await handleHealthCheck(db, headers);
@@ -43,8 +51,7 @@ export default {
 
       case API_ROUTES.VERIFY:
         return await handleRecaptha(params, db, headers, env.RECAPTCHA_SECRET) 
-      case API_ROUTES.INSIGHTS:
-        return await handleInsights(params, db, headers)
+       
       default:
         return new Response(`jayney-coffee${pathname}`, { headers });
     }

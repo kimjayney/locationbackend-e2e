@@ -6,7 +6,20 @@ CREATE TABLE Devices(
     created_at DATETIME,
     expired_at DATETIME,
     share_location INTEGER DEFAULT 0,
-    shareControlKey VARCHAR(100)
+    shareControlKey VARCHAR(100),
+    os VARCHAR(10),
+    setAllowNoti INTEGER DEFAULT 0,
+    notificationControlKey VARCHAR(100),
+    notiToken VARCHAR(400)
+);
+
+CREATE TABLE DeviceRelationNoti (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  DeviceId VARCHAR(40) NOT NULL,
+  toDeviceId VARCHAR(40),
+  created_at DATETIME,
+  FOREIGN KEY (DeviceId) REFERENCES Devices(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (toDeviceId) REFERENCES Devices(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE AuditLogs (
