@@ -6,6 +6,7 @@ import {
   handleRegisterNotificationTarget,
   handleGetNotificationTargets,
   handleGetNotificationToken,
+  handleSetAllowNotification,
   handleHealthCheck,
   handleUpdate,
   handleView,
@@ -37,6 +38,9 @@ export default {
 
       case API_ROUTES.DEVICE_GET_NOTIFICATION_TOKEN:
         return await handleGetNotificationToken(params, db, headers);
+
+      case API_ROUTES.DEVICE_SET_ALLOW_NOTIFICATION:
+        return await handleSetAllowNotification(params, db, headers);
         
       case API_ROUTES.HEALTH_CHECK:
         return await handleHealthCheck(db, headers);

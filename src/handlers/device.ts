@@ -1,12 +1,13 @@
 import { jsonResponse, validateAndRespond, returnCreatedTime, sanitizeDeviceId, validateDeviceId } from '../utils';
 
 export async function handleRegister(params: URLSearchParams, db: D1Database, headers: Headers) {
-  const validation = validateAndRespond(params, ['device', 'authorization', 'shareControlKey']);
+  const validation = validateAndRespond(params, ['device', 'authorization', 'shareControlKey', 'notiToken']);
   if (validation) return jsonResponse(validation, headers);
 
   const device = params.get('device')!;
   const authorization = params.get("authorization")!;
   const shareControlKey = params.get("shareControlKey")!;
+  const notiToken = params.get("notiToken")!;
 
   // 기기 ID 검증 및 정제
   if (!validateDeviceId(device)) {
@@ -36,8 +37,8 @@ export async function handleRegister(params: URLSearchParams, db: D1Database, he
     const notificationControlKey = crypto.randomUUID();
     
     await db.prepare(
-      "INSERT INTO Devices(id, is_enabled, created_at, expired_at, authorization, shareControlKey, notificationControlKey) VALUES(?, ?, ?, ?, ?, ?, ?)"
-    ).bind(device, 'true', created_at, expired_at, authorization, shareControlKey, notificationControlKey).run();
+      "INSERT INTO Devices(id, is_enabled, created_at, expired_at, authorization, shareControlKey, notificationControlKey, notiToken) VALUES(?, ?, ?, ?, ?, ?, ?, ?)"
+    ).bind(device, 'true', created_at, expired_at, authorization, shareControlKey, notificationControlKey, notiToken).run();
 
     // 안전한 테이블명 생성 (특수문자 제거)
     const safeTableName = `Locations_${sanitizedDevice}`;
@@ -212,6 +213,58 @@ export async function handleGetNotificationToken(params: URLSearchParams, db: D1
 
   } catch (err: any) {
     console.error("Error in handleGetNotificationToken:", err);
+    return jsonResponse({ success: false, error: err.message }, headers, 500);
+  }
+}
+
+/**
+ * 알림 허용 여부를 설정하는 핸들러
+ * /api/device/set-allow-notification?deviceId=...&authorization=...&setAllowNotification=[0|1]
+ */
+export async function handleSetAllowNotification(params: URLSearchParams, db: D1Database, headers: Headers) {
+  // 1. 필수 파라미터 검증
+  const validation = validateAndRespond(params, ['deviceId', 'authorization', 'setAllowNotification']);
+  if (validation) return jsonResponse(validation, headers, 400);
+
+  const deviceId = params.get('deviceId')!;
+  const authorization = params.get('authorization')!;
+  const setAllowNotification = params.get('setAllowNotification')!;
+
+  // 2. setAllowNotification 파라미터 값 검증 (0 또는 1)
+  if (setAllowNotification !== '0' && setAllowNotification !== '1') {
+    return jsonResponse({
+      success: false,
+      message_en_US: "Invalid 'setAllowNotification' parameter. Only 0 or 1 is allowed.",
+      message_ko_KR: "'setAllowNotification' 파라미터가 잘못되었습니다. 0 또는 1만 허용됩니다."
+    }, headers, 400);
+  }
+  const allowNotiValue = parseInt(setAllowNotification, 10);
+
+  try {
+    // 3. 요청 기기의 유효성 검증
+    const requestingDevice = await db.prepare(
+      `SELECT id FROM Devices WHERE id = ? AND authorization = ?`
+    ).bind(deviceId, authorization).first();
+
+    if (!requestingDevice) {
+      return jsonResponse({
+        success: false,
+        message_en_US: "Invalid device or authorization.",
+        message_ko_KR: "유효하지 않은 기기이거나 인증 정보가 잘못되었습니다."
+      }, headers, 403);
+    }
+
+    // 4. Devices 테이블의 setAllowNoti 컬럼 업데이트
+    await db.prepare(`UPDATE Devices SET setAllowNoti = ? WHERE id = ?`).bind(allowNotiValue, deviceId).run();
+
+    return jsonResponse({
+      success: true,
+      message_en_US: `Notification setting updated to ${allowNotiValue}.`,
+      message_ko_KR: `알림 설정이 ${allowNotiValue} (으)로 변경되었습니다.`
+    }, headers);
+
+  } catch (err: any) {
+    console.error("Error in handleSetAllowNotification:", err);
     return jsonResponse({ success: false, error: err.message }, headers, 500);
   }
 }

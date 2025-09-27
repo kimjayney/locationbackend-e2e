@@ -9,3 +9,4 @@ export { handleInsights } from './insights';
 export { handleGetNotificationTargets } from './device'
 export { handleRegisterNotificationTarget } from './device'
 export { handleGetNotificationToken } from './device'
+export { handleSetAllowNotification } from './device'
