@@ -194,7 +194,7 @@ export async function handleGetNotificationToken(params: URLSearchParams, db: D1
     // 2. 요청 기기의 유효성 검증 및 토큰 조회
     const device = await db.prepare(
       `SELECT notificationControlKey FROM Devices WHERE id = ? AND authorization = ?`
-    ).bind(deviceId, authorization).first<{ notiToken: string | null }>();
+    ).bind(deviceId, authorization).first<{ notificationControlKey: string | null }>();
 
     if (!device) {
       return jsonResponse({
