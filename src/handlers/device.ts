@@ -223,7 +223,7 @@ export async function handleGetNotificationToken(params: URLSearchParams, db: D1
  */
 export async function handleSetAllowNotification(params: URLSearchParams, db: D1Database, headers: Headers) {
   // 1. 필수 파라미터 검증
-  const validation = validateAndRespond(params, ['deviceId', 'authorization', 'setAllowNotification', 'notiToken']);
+  const validation = validateAndRespond(params, ['deviceId', 'authorization', 'setAllowNotification']);
   if (validation) return jsonResponse(validation, headers, 400);
 
   const deviceId = params.get('deviceId')!;
