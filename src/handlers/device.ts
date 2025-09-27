@@ -1,13 +1,13 @@
 import { jsonResponse, validateAndRespond, returnCreatedTime, sanitizeDeviceId, validateDeviceId } from '../utils';
 
 export async function handleRegister(params: URLSearchParams, db: D1Database, headers: Headers) {
-  const validation = validateAndRespond(params, ['device', 'authorization', 'shareControlKey', 'notiToken']);
+  const validation = validateAndRespond(params, ['device', 'authorization', 'shareControlKey']);
   if (validation) return jsonResponse(validation, headers);
 
   const device = params.get('device')!;
   const authorization = params.get("authorization")!;
   const shareControlKey = params.get("shareControlKey")!;
-  const notiToken = params.get("notiToken")!;
+  const notiToken = params.get("notiToken"); // notiToken은 선택적으로 받음
 
   // 기기 ID 검증 및 정제
   if (!validateDeviceId(device)) {
@@ -223,12 +223,13 @@ export async function handleGetNotificationToken(params: URLSearchParams, db: D1
  */
 export async function handleSetAllowNotification(params: URLSearchParams, db: D1Database, headers: Headers) {
   // 1. 필수 파라미터 검증
-  const validation = validateAndRespond(params, ['deviceId', 'authorization', 'setAllowNotification']);
+  const validation = validateAndRespond(params, ['deviceId', 'authorization', 'setAllowNotification', 'notiToken']);
   if (validation) return jsonResponse(validation, headers, 400);
 
   const deviceId = params.get('deviceId')!;
   const authorization = params.get('authorization')!;
   const setAllowNotification = params.get('setAllowNotification')!;
+  const notiToken = params.get('notiToken')!;
 
   // 2. setAllowNotification 파라미터 값 검증 (0 또는 1)
   if (setAllowNotification !== '0' && setAllowNotification !== '1') {
@@ -254,8 +255,8 @@ export async function handleSetAllowNotification(params: URLSearchParams, db: D1
       }, headers, 403);
     }
 
-    // 4. Devices 테이블의 setAllowNoti 컬럼 업데이트
-    await db.prepare(`UPDATE Devices SET setAllowNoti = ? WHERE id = ?`).bind(allowNotiValue, deviceId).run();
+    // 4. Devices 테이블의 setAllowNoti와 notiToken 컬럼 업데이트
+    await db.prepare(`UPDATE Devices SET setAllowNoti = ?, notiToken = ? WHERE id = ?`).bind(allowNotiValue, notiToken, deviceId).run();
 
     return jsonResponse({
       success: true,
