@@ -207,7 +207,7 @@ export async function handleGetNotificationToken(params: URLSearchParams, db: D1
     // 3. 토큰 반환
     return jsonResponse({
       success: true,
-      notificationToken: device.notificationControlKey
+      notificationControlKey: device.notificationControlKey
     }, headers);
 
   } catch (err: any) {
