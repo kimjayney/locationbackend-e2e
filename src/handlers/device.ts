@@ -68,15 +68,29 @@ export async function handleRegister(params: URLSearchParams, db: D1Database, he
  */
 export async function handleRegisterNotificationTarget(params: URLSearchParams, db: D1Database, headers: Headers) {
   // 1. 필수 파라미터 검증
-  const validation = validateAndRespond(params, ['deviceId', 'toDeviceId', 'tonotificationControlKey']);
+  const validation = validateAndRespond(params, ['deviceId', 'authorization', 'toDeviceId', 'tonotificationControlKey']);
   if (validation) return jsonResponse(validation, headers, 400);
 
   const deviceId = params.get('deviceId')!;
+  const authorization = params.get('authorization')!;
   const toDeviceId = params.get('toDeviceId')!;
   const tonotificationControlKey = params.get('tonotificationControlKey')!;
 
   try {
-    // 2. 대상 기기(toDeviceId)의 유효성 검증
+    // 2. 요청 기기(deviceId)의 유효성 검증
+    const requestingDevice = await db.prepare(
+      `SELECT id FROM Devices WHERE id = ? AND authorization = ?`
+    ).bind(deviceId, authorization).first();
+
+    if (!requestingDevice) {
+      return jsonResponse({
+        success: false,
+        message_en_US: "Invalid device or authorization.",
+        message_ko_KR: "유효하지 않은 기기이거나 인증 정보가 잘못되었습니다."
+      }, headers, 403);
+    }
+
+    // 3. 대상 기기(toDeviceId)의 유효성 검증
     //    - toDeviceId와 tonotificationControlKey가 일치하는 기기가 Devices 테이블에 있는지 확인
     const targetDevice = await db.prepare(
       `SELECT id FROM Devices WHERE id = ? AND notificationControlKey = ?`
@@ -90,7 +104,7 @@ export async function handleRegisterNotificationTarget(params: URLSearchParams, 
       }, headers, 404); // 404 Not Found가 더 적절합니다.
     }
 
-    // 3. 이미 등록된 관계인지 확인
+    // 4. 이미 등록된 관계인지 확인
     const existingRelation = await db.prepare(
       `SELECT id FROM DeviceRelationNoti WHERE DeviceId = ? AND toDeviceId = ?`
     ).bind(deviceId, toDeviceId).first();
@@ -103,7 +117,7 @@ export async function handleRegisterNotificationTarget(params: URLSearchParams, 
       }, headers);
     }
 
-    // 4. DeviceRelationNoti 테이블에 새로운 관계 추가
+    // 5. DeviceRelationNoti 테이블에 새로운 관계 추가
     const createdAt = returnCreatedTime();
     await db.prepare(
       `INSERT INTO DeviceRelationNoti (DeviceId, toDeviceId, created_at) VALUES (?, ?, ?)`
