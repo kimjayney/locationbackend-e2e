@@ -177,3 +177,41 @@ export async function handleGetNotificationTargets(params: URLSearchParams, db: 
     return jsonResponse({ success: false, error: err.message }, headers, 500);
   }
 }
+
+/**
+ * 특정 기기의 notificationToken을 조회하는 핸들러
+ * /api/device/notification-token?deviceId=...&authorization=...
+ */
+export async function handleGetNotificationToken(params: URLSearchParams, db: D1Database, headers: Headers) {
+  // 1. 필수 파라미터 검증
+  const validation = validateAndRespond(params, ['deviceId', 'authorization']);
+  if (validation) return jsonResponse(validation, headers, 400);
+
+  const deviceId = params.get('deviceId')!;
+  const authorization = params.get('authorization')!;
+
+  try {
+    // 2. 요청 기기의 유효성 검증 및 토큰 조회
+    const device = await db.prepare(
+      `SELECT notiToken FROM Devices WHERE id = ? AND authorization = ?`
+    ).bind(deviceId, authorization).first<{ notiToken: string | null }>();
+
+    if (!device) {
+      return jsonResponse({
+        success: false,
+        message_en_US: "Invalid device or authorization.",
+        message_ko_KR: "유효하지 않은 기기이거나 인증 정보가 잘못되었습니다."
+      }, headers, 403);
+    }
+
+    // 3. 토큰 반환
+    return jsonResponse({
+      success: true,
+      notificationToken: device.notiToken
+    }, headers);
+
+  } catch (err: any) {
+    console.error("Error in handleGetNotificationToken:", err);
+    return jsonResponse({ success: false, error: err.message }, headers, 500);
+  }
+}

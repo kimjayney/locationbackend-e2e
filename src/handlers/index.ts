@@ -8,3 +8,4 @@ export { handleRecaptha } from './recaptha';
 export { handleInsights } from './insights';
 export { handleGetNotificationTargets } from './device'
 export { handleRegisterNotificationTarget } from './device'
+export { handleGetNotificationToken } from './device'

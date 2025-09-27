@@ -20,6 +20,7 @@ export const API_ROUTES = {
   DEVICE_REGISTER: "/api/device/register",
   DEVICE_REGISTER_NOTIFICATION_TARGET: "/api/device/register-notification-target",
   DEVICE_GET_NOTIFICATION_TARGETS: "/api/device/notification-targets",
+  DEVICE_GET_NOTIFICATION_TOKEN: "/api/device/notification-token",
   HEALTH_CHECK: "/api/healthcheck",
   UPDATE: "/api/update",
   VIEW: "/api/view",
