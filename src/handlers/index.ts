@@ -6,3 +6,5 @@ export { handleView } from './view';
 export { handleShareStatus, handleShareControl } from './share';
 export { handleRecaptha } from './recaptha';
 export { handleInsights } from './insights';
+export { handleGetNotificationTargets } from './device'
+export { handleRegisterNotificationTarget } from './device'
