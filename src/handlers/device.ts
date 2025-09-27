@@ -64,17 +64,17 @@ export async function handleRegister(params: URLSearchParams, db: D1Database, he
 
 /**
  * 알림을 보낼 대상 기기를 등록하는 핸들러
- * /api/device/register-notification-target?deviceId=...&toDeviceId=...&tonotificationControlKey=...
+ * /api/device/register-notification-target?deviceId=...&toDeviceId=...&toNotificationControlKey=...
  */
 export async function handleRegisterNotificationTarget(params: URLSearchParams, db: D1Database, headers: Headers) {
   // 1. 필수 파라미터 검증
-  const validation = validateAndRespond(params, ['deviceId', 'authorization', 'toDeviceId', 'tonotificationControlKey']);
+  const validation = validateAndRespond(params, ['deviceId', 'authorization', 'toDeviceId', 'toNotificationControlKey']);
   if (validation) return jsonResponse(validation, headers, 400);
 
   const deviceId = params.get('deviceId')!;
   const authorization = params.get('authorization')!;
   const toDeviceId = params.get('toDeviceId')!;
-  const tonotificationControlKey = params.get('tonotificationControlKey')!;
+  const toNotificationControlKey = params.get('toNotificationControlKey')!;
 
   try {
     // 2. 요청 기기(deviceId)의 유효성 검증
@@ -91,10 +91,10 @@ export async function handleRegisterNotificationTarget(params: URLSearchParams, 
     }
 
     // 3. 대상 기기(toDeviceId)의 유효성 검증
-    //    - toDeviceId와 tonotificationControlKey가 일치하는 기기가 Devices 테이블에 있는지 확인
+    //    - toDeviceId와 toNotificationControlKey가 일치하는 기기가 Devices 테이블에 있는지 확인
     const targetDevice = await db.prepare(
       `SELECT id FROM Devices WHERE id = ? AND notificationControlKey = ?`
-    ).bind(toDeviceId, tonotificationControlKey).first();
+    ).bind(toDeviceId, toNotificationControlKey).first();
 
     if (!targetDevice) {
       return jsonResponse({
