@@ -42,3 +42,4 @@ CREATE TABLE Locations (
 );
 
 alter table Devices ADD column ip_collect boolean;
+alter table Devices ADD column last_updated DATETIME;

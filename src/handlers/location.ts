@@ -34,7 +34,8 @@ export async function handleUpdate(params: URLSearchParams, db: D1Database, head
       [actualSql, new Date().toISOString(), device]
     );
     await db.exec(auditSql);
-    
+    await db.prepare(`UPDATE Devices SET last_updated = ? WHERE id = ?`)
+      .bind(created_at, device).run();
     return new Response("201");
   } else {
     return new Response("not");
